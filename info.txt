@@ -1,6 +1,9 @@
-cargo doc --open ## generiert die docs für dieses projekt (HTML)
+cargo doc ## generiert die docs für dieses projekt (HTML)
+cargo doc  --features defmt
 
 emacsclient --eval "(setenv \"PATH\" \"$PATH\")" # emacs den pfad geben
 
 
 cargo tree -d
+
+cargo upgrade --dry-run  ## braucht cargo-edit tool
