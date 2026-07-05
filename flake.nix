@@ -28,8 +28,9 @@
 
       buildInputs = with pkgs; [
         toolchain
-        pkgs.probe-rs-tools
-        pkgs.flip-link
+        probe-rs-tools
+        flip-link
+        cargo-edit
         rust-analyzer
       ];
 
