@@ -1,0 +1,6 @@
+cargo doc --open ## generiert die docs für dieses projekt (HTML)
+
+emacsclient --eval "(setenv \"PATH\" \"$PATH\")" # emacs den pfad geben
+
+
+cargo tree -d
