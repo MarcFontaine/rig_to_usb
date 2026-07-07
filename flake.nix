@@ -14,8 +14,9 @@
       overlays = [ fenix.overlays.default ];
     };
     toolchain = with fenix.packages.${system}; combine [
-      minimal.cargo
-      minimal.rustc
+      complete.cargo
+      complete.rustc
+      complete.llvm-tools
       targets.thumbv7em-none-eabihf.latest.rust-std
     ];
   in
@@ -29,9 +30,11 @@
       buildInputs = with pkgs; [
         toolchain
         probe-rs-tools
+        cargo-binutils
         flip-link
         cargo-edit
         rust-analyzer
+        dfu-util
       ];
 
       CARGO_BUILD_TARGET = "thumbv7em-none-eabihf";
