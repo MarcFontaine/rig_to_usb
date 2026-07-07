@@ -28,6 +28,7 @@ minicbor = { version = "2.2", features = ["derive"] }
 [features]
 log-itm = []
 log-semihost = []
+default = ["defmt"]
 
 [dependencies.cortex-m]
 version = "0.7.7"
@@ -118,4 +119,3 @@ path = "src/main.rs"
 [[bin]]
 name = "hid-raw"
 path = "src/hid-raw.rs"
-
