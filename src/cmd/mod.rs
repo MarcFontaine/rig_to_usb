@@ -54,3 +54,16 @@ pub fn message_example() {
     }
     defmt::info!("--------------------------------------------------");
 }
+
+pub fn decode_and_run(packet: &[u8])
+{
+    let mut decoder = minicbor::Decoder::new(&packet);
+    if let Ok(msg) = decoder.decode::<MessageIn>() {
+	defmt::info!("cbor decode message: {}", msg);
+    } else
+    {
+    defmt::info!("cbor decode error");
+    defmt::info!("cbor decode daten: {=[u8]:x}", packet);
+    defmt::info!("cbor decode daten: {}", packet);
+    }
+}
