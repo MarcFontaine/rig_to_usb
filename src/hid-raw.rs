@@ -20,6 +20,7 @@ use usb_device::prelude::StringDescriptors;
 use usb_device::LangID;
 use defmt_rtt as _;
 
+mod bootloader;
 mod cmd;
 use cmd::{message_example};
 

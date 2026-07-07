@@ -10,7 +10,7 @@ pub fn main_loop<B: UsbBus>
     ) -> !
 {
     let mut rx_packet = [0u8; 64];
-    defmt::info!("Starting Loop");
+    defmt::info!("Starting Loop (updated xx2)");
     loop {	
         if usb_dev.poll(&mut [hid]) {
             match hid.pull_raw_output(&mut rx_packet) {

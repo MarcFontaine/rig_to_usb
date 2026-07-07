@@ -8,3 +8,24 @@ cargo tree -d
 
 cargo upgrade --dry-run  ## braucht cargo-edit tool
 RUSTFLAGS="--verbose" cargo build  --features defmt --bin hid-raw # alle typen ausschreiben
+
+cargo build --release --no-default-features # [features] eintrag in Cargo.toml ignorieren
+
+
+bootloader:
+dfu-util -l
+* firmware muss als release gebaut werden
+cargo-objcopy --release --bin hid-raw -- -O binary firmware.bin
+dfu-util -a 0 -d 0483:df11 -s 0x08000000:leave -D firmware.bin
+* ACHTUNG !! probe-rs muss die richtige firmware übergeben werden:
+target/thumbv7em-none-eabihf/release/hid-raw
+                             ^^^^^^^
+probe-rs attach --chip STM32G474CEUx  --rtt-scan-memory --read-flasher-rtt target/thumbv7em-none-eabihf/release/hid-raw
+
+Die Tastenkombination für den Bootloader:
+    Drücken Sie den BOOT-Taster und halten Sie ihn gedrückt.
+    Drücken Sie kurz den RST-Taster (während Sie BOOT weiterhin gedrückt halten).
+    Lassen Sie den RST-Taster wieder los.
+    Lassen Sie nun auch den BOOT-Taster los.
+=> kann fehlgeschlagen
+=> RTS-Taster und power-cycle (AUS AN)
