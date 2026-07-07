@@ -1,42 +1,27 @@
-#![no_std]
-#![no_main]
-
-use panic_halt as _;
-use cortex_m_rt::entry;
-
-use stm32g4xx_hal as hal;
-
 use usbd_hid::{hid_class::HIDClass};
 use usbd_hid::descriptor::generator_prelude::*;
 
-use stm32g4xx_hal::usb::UsbBus;
+use stm32g4xx_hal as hal;
 use usb_device::prelude::UsbDeviceBuilder;
 use usb_device::prelude::UsbVidPid;
 use usb_device::prelude::StringDescriptors;
 use usb_device::LangID;
-use defmt_rtt as _;
+use stm32g4xx_hal::gpio::GpioExt;
+use usb_device::prelude::UsbDevice;
 
-mod bootloader;
-mod cmd;
-use cmd::{message_example};
+use crate::init::{BoardPeripherals};
+use stm32g4xx_hal::{
+    usb::{Peripheral, UsbBus}, 
+    pac::USB,
+};
+use usb_device::bus::UsbBusAllocator;
+use static_cell::StaticCell;
 
-mod init;
-use init::{init_rcc};
+static USB_BUS: StaticCell<UsbBusAllocator<UsbBusType>> = StaticCell::new();
 
-mod main_loop;
-use main_loop::{main_loop};
-
-//mod usb;
-//use usb::{init_usb};
-
-#[entry]
-fn main() -> ! {
-    defmt::info!("Hello, USB-World!");
-    message_example();
-
-    let (usb_peripheral, mut board_peripherals) = init_rcc();
-
-    let usb_bus = UsbBus::new(usb_peripheral);
+pub fn init_usb(usb_peripheral: USB) -> UsbDevice<'static, UsbBusType> { 
+    let bus_allocator = UsbBusAllocator::new(usb_peripheral);
+    let usb_bus = USB_BUS.init(bus_allocator);
 
     #[gen_hid_descriptor(
     (collection = APPLICATION, usage_page = VENDOR_DEFINED_START, usage = 0x01) = {
@@ -45,8 +30,8 @@ fn main() -> ! {
     }
     )]
     struct CustomBidirectionalReport {
-       input_buffer: [u8; 32],
-       output_buffer: [u8; 32],
+	input_buffer: [u8; 32],
+	output_buffer: [u8; 32],
     }
     let mut hid = HIDClass::new(&usb_bus, CustomBidirectionalReport::desc(), 10); // 10ms Polling-Intervall
     let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x1209, 0x0001))
@@ -56,9 +41,8 @@ fn main() -> ! {
                 .product("RigToUSB")
                 .serial_number("TEST")
         ])
-       .expect("Cannot set USB String Descriptors")
-       .device_class(0x00)
-       .build();
-
-    main_loop(&mut board_peripherals, &mut usb_dev, &mut hid);
+	.expect("Cannot set USB String Descriptors") 
+	.device_class(0x00)
+	.build();
+  (usb_dev)
 }

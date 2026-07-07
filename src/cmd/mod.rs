@@ -1,22 +1,26 @@
 use minicbor::{Decode, Encode};
 use minicbor::encode::write::Cursor;
 use defmt_rtt as _;
+use crate::hal::gpio::PinState;
 
 use crate::bootloader::jump_to_st_bootloader;
+use crate::init::{BoardPeripherals};
 
 #[derive(defmt::Format)]
 #[derive(Decode, Encode, Debug)]
 #[cbor(flat)]
 pub enum Cmd {
     #[n(0)]
-    Success{#[n(0)] value: u32},
+    StartBootLoader(),
     #[n(1)]
+    LED{#[n(0)] value: bool},
+    #[n(2)]
+    Success{#[n(0)] value: u32},
+    #[n(3)]
     Error {
         #[n(0)] code: u32,
         #[n(1)] message: u32,
     },
-    #[n(3)]
-    StartBootLoader(),
 }
 
 pub fn message_example() {
@@ -42,7 +46,7 @@ pub fn message_example() {
     let mut tx_buffer2 = [0u8; 64];
     let mut cursor2 = Cursor::new(&mut tx_buffer2[..]);
 
-    let msg_error = Cmd::Error { code: 5, message: 100 };
+    let msg_error = Cmd::LED { value: false};
     defmt::info!("2. Teste: {:?}", msg_error);
 
     if let Ok(_encoded_s) = minicbor::encode(&msg_error, &mut cursor2) {
@@ -59,12 +63,15 @@ pub fn message_example() {
     defmt::info!("--------------------------------------------------");
 }
 
-pub fn decode_and_run(packet: &[u8])
+pub fn decode_and_run(
+    board_peripherals: &mut BoardPeripherals,
+    packet: &[u8]
+)
 {
     let mut decoder = minicbor::Decoder::new(&packet);
     if let Ok(cmd) = decoder.decode::<Cmd>() {
 	defmt::info!("cbor decode message: {}", cmd);
-	run_cmd(cmd);
+	run_cmd(board_peripherals,cmd);
     } else
     {
     defmt::info!("cbor decode error");
@@ -73,10 +80,15 @@ pub fn decode_and_run(packet: &[u8])
     }
 }
 
-pub fn run_cmd(cmd: Cmd) {
+pub fn run_cmd(
+    board_peripherals: &mut BoardPeripherals,
+    cmd: Cmd
+)
+{
     match cmd {
+	Cmd::StartBootLoader() => {jump_to_st_bootloader();}
+	Cmd::LED{ value } => {board_peripherals.led.set_state(PinState::from(value));}
 	Cmd::Error { code: _, message: _ } => {}
 	Cmd::Success { value:_ } => {jump_to_st_bootloader();}
-	Cmd::StartBootLoader() => {jump_to_st_bootloader();}
     }
 }

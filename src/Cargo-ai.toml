@@ -1,0 +1,19 @@
+[package]
+name = "stm32f4-cbor-hid"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.1" # Einfacher Panic-Handler für Embedded
+
+# STM32F4 HAL (wählen Sie Ihr passendes Feature, z.B. stm32f411 oder stm32f405)
+stm32f4xx-hal = { version = "0.21.0", features = ["stm32f411", "rt"] }
+
+# USB-Stack
+usb-device = "0.3"
+usbd-hid = "0.6"
+
+# CBOR-Verarbeitung (no_std kompatibel)
+minicbor = { version = "0.24", features = ["derive"] }

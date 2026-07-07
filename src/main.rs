@@ -5,11 +5,14 @@
 #![no_main]
 
 use cortex_m_rt::entry;
-use hal::prelude::*;
-use hal::pwr::PwrExt;
-use hal::usb::{Peripheral, UsbBus};
-use hal::{rcc, stm32};
 use stm32g4xx_hal as hal;
+
+use hal::prelude::*; // Bringt Erweiterungen wie .constrain(), .freeze() und .MHz()
+use hal::rcc;        // Ermöglicht rcc::Config::pll()
+use hal::pac;        // Das korrekte Peripherie-Modul (ersetzt hal::stm32)
+
+// Für USB (Hinweis: Peripheral & UsbBus werden oft implizit über den Treiber genutzt)
+use hal::usb::{Peripheral, UsbBus};
 
 use usb_device::prelude::*;
 use usbd_serial::{SerialPort, USB_CLASS_CDC};
