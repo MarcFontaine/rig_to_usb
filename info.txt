@@ -7,3 +7,4 @@ emacsclient --eval "(setenv \"PATH\" \"$PATH\")" # emacs den pfad geben
 cargo tree -d
 
 cargo upgrade --dry-run  ## braucht cargo-edit tool
+RUSTFLAGS="--verbose" cargo build  --features defmt --bin hid-raw # alle typen ausschreiben

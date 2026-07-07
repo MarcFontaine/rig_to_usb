@@ -21,10 +21,13 @@ use usb_device::LangID;
 use defmt_rtt as _;
 
 mod cmd;
-use cmd::{MessageIn, message_example};
+use cmd::{message_example};
 
 mod init;
 use init::{init_rcc};
+
+mod main_loop;
+use main_loop::{main_loop};
 
 //mod usb;
 //use usb::{init_usb};
@@ -70,25 +73,5 @@ fn main() -> ! {
        .device_class(0x00)
        .build();
 
-    let mut rx_packet = [0u8; 64];
-    defmt::info!("Starting Loop");
-    loop {	
-        if usb_dev.poll(&mut [&mut hid]) {
-            match hid.pull_raw_output(&mut rx_packet) {
-                Ok(bytes_read) if bytes_read > 0 => {
-                    let mut decoder = minicbor::Decoder::new(&rx_packet[..bytes_read]);
-                    if let Ok(msg) = decoder.decode::<MessageIn>() {
-		        defmt::info!("cbor decode message: {}", msg);
-                    } else
-		    {
-                        defmt::info!("cbor decode error");
-		        defmt::info!("cbor decode daten: {=[u8]:x}", rx_packet);
-		        defmt::info!("cbor decode daten: {}", rx_packet);
-		    }
-                    
-                }
-                _ => {}
-            }
-        }
-    }
+    main_loop(&mut usb_dev, &mut hid);
 }
