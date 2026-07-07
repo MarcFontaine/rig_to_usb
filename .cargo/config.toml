@@ -1,5 +1,14 @@
+# [term]
+# verbose = true
+
 [build]
+# also look at build.rs with sets extra flags:
+#  "-C", "link-arg=-Tlink.x" must not be set twice
+
 target = "thumbv7em-none-eabihf"
+rustflags = [
+  "--verbose"
+]
 
 [target.thumbv7em-none-eabihf]
 runner = "probe-rs run --chip STM32G474CEUA"
