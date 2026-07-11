@@ -14,9 +14,9 @@ use usb_device::prelude::StringDescriptors;
 use usb_device::LangID;
 use defmt_rtt as _;
 
-use rig_to_usb::cmd::{message_example};
-use rig_to_usb::init::{init_rcc};
-use rig_to_usb::main_loop::{main_loop};
+use rig_to_usb::firmware::cmd::{message_example};
+use rig_to_usb::firmware::init::{init_rcc};
+use rig_to_usb::firmware::main_loop::{main_loop};
 
 #[entry]
 fn main() -> ! {

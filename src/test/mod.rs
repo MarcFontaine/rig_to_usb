@@ -1,8 +1,7 @@
 #[cfg(test)]
-use crate::cmd::{message_example};
+use create::morse::morse_char;
 
-#[cfg(feature = "std")]
 pub fn test()
 {
-    message_example();
+
 }

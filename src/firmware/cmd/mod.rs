@@ -3,8 +3,8 @@ use minicbor::encode::write::Cursor;
 use defmt_rtt as _;
 use stm32g4xx_hal::gpio::PinState;
 
-use crate::bootloader::jump_to_st_bootloader;
-use crate::init::{BoardPeripherals};
+use crate::firmware::bootloader::jump_to_st_bootloader;
+use crate::firmware::init::{BoardPeripherals};
 
 #[derive(defmt::Format)]
 #[derive(Decode, Encode, Debug)]

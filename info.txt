@@ -38,7 +38,4 @@ tests:
 repl:
 evcxr
 
-
-[fontaine@t480:~/p/rigToUsb]$ evcxr
-Welcome to evcxr. For help, type :help
->> mod morse { include!("/home/fontaine/p/rig_to_usb/src/morse/mod.rs"); }
+:dep rig_to_usb = { path = ".", default-features = false }
