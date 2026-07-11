@@ -37,6 +37,21 @@ macro_rules! println {
     ($($arg:tt)*) => {};
 }
 
+
+#[cfg(not(feature = "defmt"))]
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => {
+        $crate::std::print!($($arg)*);
+    };
+}
+
+#[cfg(feature = "defmt")]
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => {};
+}
+
 pub mod cmd;
 pub mod morse;
 pub mod test;

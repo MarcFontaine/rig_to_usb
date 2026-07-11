@@ -1,4 +1,5 @@
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+
 pub enum PinState {    
     High,
     Low,
@@ -93,9 +94,30 @@ pub fn next_pin_state(s: State) -> Option<(PinState, State)>
 	L(0,[]) => None,
 	L(0,[Dit, rest @ ..]) => Some((High, H(0,rest))),
 	L(0,[Dah, rest @ ..]) => Some((High, H(2,rest))),
-	L(n,s) => Some((Low, L(n-1,s))),
-	H(0,[]) => Some((High, L(2,&[]))),
-	H(0,s) => Some((High, L(1,s))),
+	L(n,s) => Some((Low, L(n-1, s))),
+	H(0,[]) => Some((Low, L(0, &[]))),
+	H(0,s) => Some((Low, L(0, s))),
 	H(n,s) => Some((High, H(n-1,s))),
     }
+}
+
+pub fn test()
+{
+    print!("->");
+    let mut s = L(0, &[Dit, Dit, Dah, Dah, Dit, Dit] );
+    loop {
+	match next_pin_state(s) {
+	    None => { break;}
+	    Some((High, n)) => {
+		print!("#");
+		s = n;
+	    }
+	    Some((Low, n)) => {
+		print!(" ");
+		s = n;
+	    }
+
+	}
+    };
+    println!("<-");
 }
