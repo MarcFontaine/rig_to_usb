@@ -4,8 +4,6 @@
 use panic_halt as _;
 use cortex_m_rt::entry;
 
-use stm32g4xx_hal as hal;
-
 use usbd_hid::{hid_class::HIDClass};
 use usbd_hid::descriptor::generator_prelude::*;
 
@@ -16,18 +14,9 @@ use usb_device::prelude::StringDescriptors;
 use usb_device::LangID;
 use defmt_rtt as _;
 
-mod bootloader;
-mod cmd;
-use cmd::{message_example};
-
-mod init;
-use init::{init_rcc};
-
-mod main_loop;
-use main_loop::{main_loop};
-
-//mod usb;
-//use usb::{init_usb};
+use rig_to_usb::cmd::{message_example};
+use rig_to_usb::init::{init_rcc};
+use rig_to_usb::main_loop::{main_loop};
 
 #[entry]
 fn main() -> ! {

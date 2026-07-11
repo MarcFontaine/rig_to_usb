@@ -1,20 +1,13 @@
-use stm32g4xx_hal as hal;
-
-use hal::stm32::{Peripherals};
-use hal::rcc;
-use hal::rcc::PllSrc;
-use hal::rcc::PllMDiv;
-use hal::rcc::PllNMul;
-use hal::rcc::PllRDiv;
-use crate::hal::stm32::GPIOB;
+use stm32g4xx_hal::stm32::{Peripherals};
+use stm32g4xx_hal::rcc;
+use stm32g4xx_hal::rcc::{PllSrc, PllMDiv, PllNMul, PllRDiv};
 use stm32g4xx_hal::time::RateExtU32;
-use stm32g4xx_hal::gpio::GpioExt;
+use stm32g4xx_hal::gpio::{ GpioExt, Pin, Output};
 use stm32g4xx_hal::rcc::RccExt;
 use stm32g4xx_hal::pwr::PwrExt;
-use crate::hal::stm32::TIM2;
-use crate::hal::gpio::Output;
-use crate::hal::gpio::Pin;
+use stm32g4xx_hal::stm32::TIM2;
 use stm32g4xx_hal::usb::Peripheral;
+use stm32g4xx_hal::stm32::GPIOB;
 
 pub struct BoardPeripherals {
     pub _gpiob: GPIOB,

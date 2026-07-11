@@ -1,5 +1,5 @@
 [package]
-name = "rigToUsb"
+name = "rig_to_usb"
 version = "0.1.0"
 edition = "2024"
 
@@ -29,6 +29,7 @@ minicbor = { version = "2.2", features = ["derive"] }
 log-itm = []
 log-semihost = []
 default = ["defmt"]
+std = []
 
 [dependencies.cortex-m]
 version = "0.7.7"
@@ -117,5 +118,5 @@ name = "main"
 path = "src/main.rs"
 
 [[bin]]
-name = "hid-raw"
-path = "src/hid-raw.rs"
+name = "hid_raw"
+path = "src/hid_raw.rs"

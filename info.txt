@@ -1,8 +1,7 @@
 cargo doc ## generiert die docs für dieses projekt (HTML)
 cargo doc  --features defmt
 
-emacsclient --eval "(setenv \"PATH\" \"$PATH\")" # emacs den pfad geben
-
+DEFMT_LOG=info  cargo run --bin hid_raw --features defmt  -- --speed 1000 --rtt-scan-memory --read-flasher-rtt
 
 cargo tree -d
 
@@ -29,3 +28,17 @@ Die Tastenkombination für den Bootloader:
     Lassen Sie nun auch den BOOT-Taster los.
 => kann fehlgeschlagen
 => RTS-Taster und power-cycle (AUS AN)
+
+
+tests:
+0x82,0x01,0xf4 LED Off
+0x82,0x01,0xf5 LED On
+
+
+repl:
+evcxr
+
+
+[fontaine@t480:~/p/rigToUsb]$ evcxr
+Welcome to evcxr. For help, type :help
+>> mod morse { include!("/home/fontaine/p/rig_to_usb/src/morse/mod.rs"); }

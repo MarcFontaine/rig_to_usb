@@ -35,6 +35,7 @@
         cargo-edit
         rust-analyzer
         dfu-util
+        evcxr
       ];
 
       CARGO_BUILD_TARGET = "thumbv7em-none-eabihf";
@@ -44,6 +45,9 @@
        "${cc}/bin/${cc.targetPrefix}cc";
 
       shellHook = ''
+        export RUST_SRC_PATH="${toolchain}/lib/rustlib/src/rust/library"
+        export PATH="${toolchain}/bin:$PATH"
+        export EVCXR_COMPLETION_TYPE=circular
         echo "Rust DevShell aktiv!"
         echo "Rust-Version: $(rustc --version)"
       '';

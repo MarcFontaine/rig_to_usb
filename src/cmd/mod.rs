@@ -1,7 +1,7 @@
 use minicbor::{Decode, Encode};
 use minicbor::encode::write::Cursor;
 use defmt_rtt as _;
-use crate::hal::gpio::PinState;
+use stm32g4xx_hal::gpio::PinState;
 
 use crate::bootloader::jump_to_st_bootloader;
 use crate::init::{BoardPeripherals};
@@ -22,13 +22,14 @@ pub enum Cmd {
         #[n(1)] message: u32,
     },
 }
+use Cmd::*;
 
 pub fn message_example() {
     defmt::info!("--- CBOR Test mit defmt gestartet ---");
 
     let mut tx_buffer1 = [0u8; 64];
     let mut cursor1 = Cursor::new(&mut tx_buffer1[..]);
-    let msg_success = Cmd::Success{value:42};
+    let msg_success = Success{value:42};
     defmt::info!("1. Teste: {:?}", msg_success);
     if let Ok(_encoded_s) = minicbor::encode(&msg_success, &mut cursor1) {
         let bytes_written = cursor1.position();
@@ -46,7 +47,7 @@ pub fn message_example() {
     let mut tx_buffer2 = [0u8; 64];
     let mut cursor2 = Cursor::new(&mut tx_buffer2[..]);
 
-    let msg_error = Cmd::LED { value: false};
+    let msg_error = LED { value: false};
     defmt::info!("2. Teste: {:?}", msg_error);
 
     if let Ok(_encoded_s) = minicbor::encode(&msg_error, &mut cursor2) {
@@ -86,9 +87,9 @@ pub fn run_cmd(
 )
 {
     match cmd {
-	Cmd::StartBootLoader() => {jump_to_st_bootloader();}
-	Cmd::LED{ value } => {board_peripherals.led.set_state(PinState::from(value));}
-	Cmd::Error { code: _, message: _ } => {}
-	Cmd::Success { value:_ } => {jump_to_st_bootloader();}
+	StartBootLoader() => {jump_to_st_bootloader();}
+	LED{ value } => {board_peripherals.led.set_state(PinState::from(value));}
+	Error { code: _, message: _ } => {}
+	Success { value:_ } => {jump_to_st_bootloader();}
     }
 }
