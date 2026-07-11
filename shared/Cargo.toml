@@ -1,0 +1,13 @@
+[package]
+name = "rig_to_usb_logic"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+defmt = ["dep:defmt"]
+
+[dependencies]
+minicbor = { version = "2.2", features = ["derive"] }
+defmt = { version = "0.3", optional = true }
+

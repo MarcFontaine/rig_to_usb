@@ -2,8 +2,8 @@ use usb_device::prelude::UsbDevice;
 use usb_device::class_prelude::UsbBus;
 use usbd_hid::hid_class::HIDClass;
 
-use crate::firmware::init::{BoardPeripherals};
-use crate::firmware::cmd::{decode_and_run};
+use crate::init::{BoardPeripherals};
+use crate::cmd::{decode_and_run};
 
 pub fn main_loop<B: UsbBus>
     (boardboard_peripherals: &mut BoardPeripherals

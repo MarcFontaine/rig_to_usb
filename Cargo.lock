@@ -829,6 +829,7 @@ dependencies = [
  "paste",
  "rand",
  "rand_core 0.10.1",
+ "rig_to_usb_logic",
  "stm32-hrtim 0.2.0",
  "stm32-usbd 0.8.0",
  "stm32g4",
@@ -838,6 +839,14 @@ dependencies = [
  "usbd-hid",
  "usbd-serial",
  "void",
+]
+
+[[package]]
+name = "rig_to_usb_logic"
+version = "0.1.0"
+dependencies = [
+ "defmt 0.3.100",
+ "minicbor",
 ]
 
 [[package]]

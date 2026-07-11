@@ -1,8 +1,6 @@
 #![no_std]
 
-#[cfg(feature = "firmware")]
-pub mod firmware;
-
-pub mod morse;
-pub mod test;
-
+pub mod bootloader;
+pub mod cmd;
+pub mod init;
+pub mod main_loop;
