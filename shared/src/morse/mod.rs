@@ -82,29 +82,75 @@ pub fn morse_char(c: u8) -> &'static [Symbol] {
 
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum State {
+pub enum CharState {
+    S(&'static [Symbol]),
     H(u8, &'static [Symbol]),
     L(u8, &'static [Symbol]),
 }
-use State::*;
+use CharState::*;
 
-pub fn next_pin_state(s: State) -> Option<(PinState, State)>
+// pause_len must be >= 1
+pub fn next_pin_state_char(pause_len: u8, s: CharState) -> Option<(PinState, CharState)>
 {
     match s {
-	L(0,[]) => None,
-	L(0,[Dit, rest @ ..]) => Some((High, H(0,rest))),
-	L(0,[Dah, rest @ ..]) => Some((High, H(2,rest))),
+	S([]) => None,
+	S([Dit, rest @ ..]) => Some((High, H(1,rest))),
+	S([Dah, rest @ ..]) => Some((High, H(3,rest))),
+	L(1,[]) => None,
+	L(1,[Dit, rest @ ..]) => Some((High, H(1,rest))),
+	L(1,[Dah, rest @ ..]) => Some((High, H(3,rest))),
 	L(n,s) => Some((Low, L(n-1, s))),
-	H(0,[]) => Some((Low, L(0, &[]))),
-	H(0,s) => Some((Low, L(0, s))),
-	H(n,s) => Some((High, H(n-1,s))),
+	H(1,[]) => Some((Low, L(pause_len, &[]))),
+	H(1,s) => Some((Low, L(1, s))),
+	H(n,s) => Some((High, H(n-1, s))),
     }
 }
 
 pub fn test()
 {
     print!("->");
-    let mut s = L(0, &[Dit, Dit, Dah, Dah, Dit, Dit] );
+    let mut s = S( &[Dit, Dit, Dah, Dah, Dit, Dit] );
+    loop {
+	match next_pin_state_char(10, s) {
+	    None => { break;}
+	    Some((High, n)) => {
+		print!("#");
+		s = n;
+	    }
+	    Some((Low, n)) => {
+		print!(" ");
+		s = n;
+	    }
+
+	}
+    };
+    println!("<-");
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LineState {
+    state: CharState,
+    rest_line: &'static [u8]
+}
+
+pub fn next_pin_state(ls: LineState) -> Option<(PinState, LineState)>
+{
+    match ( ls.rest_line, next_pin_state_char(3, ls.state) ) {
+	(_,  Some((level, next))) => Some((level, LineState { state: next, rest_line: ls.rest_line})),
+	([], None) => None, // todo: fix add end of word pause
+	([ c, r @ ..], None) => next_pin_state( LineState { state: S(morse_char(*c)), rest_line: r}),
+    }
+}
+
+
+pub fn test2()
+{
+    print!("->");
+    let mut s = LineState {
+	state: S(&[]),
+	rest_line: b"Hello"
+    };
+
     loop {
 	match next_pin_state(s) {
 	    None => { break;}

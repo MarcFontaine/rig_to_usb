@@ -43,7 +43,7 @@ pub fn cbor_message_test() {
             println!("   -> Dekodiert erfolgreich: {:?}", decoded);	    
         } else {
             error!("   -> Dekodierung fehlgeschlagen!");
-            println!("   -> Dekodierung fehlgeschlagen!");	    
+            println!("   -> Dekodierung fehlgeschlagen!");
         }
     }
     info!("--------------------------------------------------");
@@ -61,8 +61,10 @@ pub fn cbor_message_test() {
 
         if let Ok(decoded) = minicbor::decode::<Cmd>(encoded_slice) {
             info!("   -> Dekodiert erfolgreich: {:?}", decoded);
+            println!("   -> Dekodiert erfolgreich: {:?}", decoded);
         } else {
             error!("   -> Dekodierung fehlgeschlagen!");
+            println!("   -> Dekodierung fehlgeschlagen!");
         }
     }
     info!("--------------------------------------------------");
