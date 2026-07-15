@@ -1,7 +1,7 @@
 use defmt_rtt as _;
-use stm32g4xx_hal::gpio::PinState;
+use crate::hal::gpio::PinState;
 
-use crate::bootloader::jump_to_st_bootloader;
+//use crate::bootloader::jump_to_st_bootloader;
 use crate::init::{BoardPeripherals};
 
 use rig_to_usb_logic::cmd::Cmd;
@@ -30,9 +30,9 @@ pub fn run_cmd(
 )
 {
     match cmd {
-	StartBootLoader() => {jump_to_st_bootloader();}
+	StartBootLoader() => {} //jump_to_st_bootloader();}
 	LED{ value } => {board_peripherals.led.set_state(PinState::from(value));}
 	Error { code: _, message: _ } => {}
-	Success { value:_ } => {jump_to_st_bootloader();}
+	Success { value:_ } => {} //jump_to_st_bootloader();}
     }
 }

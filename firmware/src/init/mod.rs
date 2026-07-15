@@ -1,52 +1,11 @@
-use crate::hal::{*};
-use usb_device::class_prelude::UsbBusAllocator;
-use static_cell::StaticCell;
+#[cfg(feature = "stm32g474")]
+mod init_stm32g474;
 
-pub type BoardUsbBus = UsbBus<Peripheral<Pin<'A', 11, Alternate<14>>, Pin<'A', 12, Alternate<14>>>>;
-static USB_BUS_ALLOCATOR: StaticCell<UsbBusAllocator<BoardUsbBus>> = StaticCell::new();
+#[cfg(feature = "stm32f103")]
+mod init_stm32f103;
 
-pub struct BoardPeripherals {
-    pub _gpiob: GPIOB,
-    pub _tim2: TIM2,
-    pub led: Pin<'C', 6, Output>,
-    pub usb_bus: &'static UsbBusAllocator<BoardUsbBus>,
-}
+#[cfg(feature = "stm32g474")]
+pub use crate::init::init_stm32g474::{BoardPeripherals, BoardUsbBus, init_rcc};
 
-pub fn init_rcc() -> BoardPeripherals
-{
-    let dp = Peripherals::take().expect("cannot take peripherals");
-
-    let pwr = dp.PWR.constrain().freeze();
- 
-    let mut pll_config = stm32g4xx_hal::rcc::PllConfig::default();
-    pll_config.mux = PllSrc::HSE(8_u32.MHz());
-    pll_config.m = PllMDiv::DIV_2;
-    pll_config.n = PllNMul::MUL_75;
-    pll_config.r = Some(PllRDiv::DIV_2);
-
-    let config = rcc::Config::new(rcc::SysClockSrc::PLL)
-      .pll_cfg(pll_config);
-
-    let mut rcc = dp.RCC.freeze(config, pwr);
-    rcc.enable_hsi48();
-    let led = dp.GPIOC.split(&mut rcc).pc6.into_push_pull_output();
-
-    let gpioa = dp.GPIOA.split(&mut rcc);
-    let usb_dm = gpioa.pa11.into_alternate();
-    let usb_dp = gpioa.pa12.into_alternate();
-
-    let usb_peripheral = Peripheral {
-        usb: dp.USB,
-        pin_dm: usb_dm,
-        pin_dp: usb_dp,
-    };
-    let raw = UsbBus::new(usb_peripheral);
-    let st_bus = USB_BUS_ALLOCATOR.init(raw);
-
-     BoardPeripherals {
-        _gpiob: dp.GPIOB,
-        _tim2: dp.TIM2,
-	led: led,
-	usb_bus: st_bus
-    }
-}
+#[cfg(feature = "stm32f103")]
+pub use crate::init::init_stm32f103::{BoardPeripherals, BoardUsbBus, init_rcc};
