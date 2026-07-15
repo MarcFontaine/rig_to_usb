@@ -130,15 +130,16 @@ pub fn test()
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct LineState {
     state: CharState,
-    rest_line: &'static [u8]
+    rest_line: Option<&'static [u8]>
 }
 
 pub fn next_pin_state(ls: LineState) -> Option<(PinState, LineState)>
 {
     match ( ls.rest_line, next_pin_state_char(3, ls.state) ) {
 	(_,  Some((level, next))) => Some((level, LineState { state: next, rest_line: ls.rest_line})),
-	([], None) => None, // todo: fix add end of word pause
-	([ c, r @ ..], None) => next_pin_state( LineState { state: S(morse_char(*c)), rest_line: r}),
+	(Some([]), None) => None, // todo: fix add end of word pause
+	(Some([ c, r @ ..]), None) => next_pin_state( LineState { state: S(morse_char(*c)), rest_line: Some(r)}),
+	(None, None) => None
     }
 }
 
@@ -148,7 +149,7 @@ pub fn test2()
     print!("->");
     let mut s = LineState {
 	state: S(&[]),
-	rest_line: b"Hello"
+	rest_line: Some(b"Hello")
     };
 
     loop {

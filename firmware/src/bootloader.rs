@@ -1,4 +1,4 @@
-use stm32g4xx_hal::pac;
+use crate::hal::{*};
 
 pub fn jump_to_st_bootloader() -> ! {
     cortex_m::interrupt::disable();

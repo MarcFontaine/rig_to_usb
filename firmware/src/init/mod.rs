@@ -1,13 +1,5 @@
-use stm32g4xx_hal::stm32::{Peripherals};
-use stm32g4xx_hal::rcc;
-use stm32g4xx_hal::rcc::{PllSrc, PllMDiv, PllNMul, PllRDiv};
-use stm32g4xx_hal::time::RateExtU32;
-use stm32g4xx_hal::gpio::{ GpioExt, Pin, Output};
-use stm32g4xx_hal::rcc::RccExt;
-use stm32g4xx_hal::pwr::PwrExt;
-use stm32g4xx_hal::stm32::TIM2;
-use stm32g4xx_hal::usb::Peripheral;
-use stm32g4xx_hal::stm32::GPIOB;
+use crate::hal::{*};
+use usb_device::class_prelude::UsbBusAllocator;
 
 pub struct BoardPeripherals {
     pub _gpiob: GPIOB,
@@ -16,7 +8,7 @@ pub struct BoardPeripherals {
 }
 
 pub fn init_rcc() -> (
-    Peripheral<stm32g4xx_hal::gpio::Pin<'A', 11, stm32g4xx_hal::gpio::Alternate<14>>, stm32g4xx_hal::gpio::Pin<'A', 12, stm32g4xx_hal::gpio::Alternate<14>>>,
+    UsbBusAllocator<stm32g4xx_hal::usb::UsbBus<stm32g4xx_hal::usb::Peripheral<stm32g4xx_hal::gpio::Pin<'A', 11, stm32g4xx_hal::gpio::Alternate<14>>, stm32g4xx_hal::gpio::Pin<'A', 12, stm32g4xx_hal::gpio::Alternate<14>>>>>,    
     BoardPeripherals)
 {
     let dp = Peripherals::take().expect("cannot take peripherals");
@@ -45,7 +37,7 @@ pub fn init_rcc() -> (
         pin_dm: usb_dm,
         pin_dp: usb_dp,
     };
-    (usb_peripheral,
+    (UsbBus::new(usb_peripheral),
     BoardPeripherals {
         _gpiob: dp.GPIOB,
         _tim2: dp.TIM2,

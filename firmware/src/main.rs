@@ -1,25 +1,10 @@
-//! CDC-ACM serial port example using polling in a busy loop.
 #![deny(warnings)]
 #![deny(unsafe_code)]
 #![no_std]
 #![no_main]
 
-use cortex_m_rt::entry;
-use stm32g4xx_hal as hal;
-
-use hal::prelude::*; // Bringt Erweiterungen wie .constrain(), .freeze() und .MHz()
-use hal::rcc;        // Ermöglicht rcc::Config::pll()
-use hal::pac;        // Das korrekte Peripherie-Modul (ersetzt hal::stm32)
-
-// Für USB (Hinweis: Peripheral & UsbBus werden oft implizit über den Treiber genutzt)
-use hal::usb::{Peripheral, UsbBus};
-
-use usb_device::prelude::*;
-use usbd_serial::{SerialPort, USB_CLASS_CDC};
-
+use crate::hal::{*};
 use utils::logger::info;
-
-//use panic_probe as _;
 
 #[macro_use]
 mod utils;
