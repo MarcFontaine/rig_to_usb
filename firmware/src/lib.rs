@@ -18,5 +18,6 @@ pub mod hal {
   pub use stm32g4xx_hal::usb::Peripheral;
   pub use stm32g4xx_hal::stm32::GPIOB;
   pub use stm32g4xx_hal::usb::UsbBus;
+  pub use stm32g4xx_hal::gpio::Alternate;
   pub use stm32g4xx_hal::pac;
 }

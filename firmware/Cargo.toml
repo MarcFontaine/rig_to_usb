@@ -7,6 +7,7 @@ build = "build.rs"
 [dependencies]
 rig_to_usb_logic = { path = "../shared", features = ["defmt"] }
 
+static_cell = "2.1"
 nb = "1"
 stm32g4 = { version = "0.16.0", features = ["atomics"] }
 paste = "1.0"

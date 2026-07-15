@@ -14,9 +14,9 @@ use rig_to_usb::usb::{init_usb};
 fn main() -> ! {
     defmt::info!("Hello, USB-World!");
 
-    let (usb_bus, mut board_peripherals) = init_rcc();
+    let mut board_peripherals = init_rcc();
 
-    let (mut usb_dev, mut hid) = init_usb(& usb_bus);
+    let (mut usb_dev, mut hid) = init_usb(board_peripherals.usb_bus);
 
     main_loop(&mut board_peripherals, &mut usb_dev, &mut hid);
 }
