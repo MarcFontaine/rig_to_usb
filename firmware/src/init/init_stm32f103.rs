@@ -1,4 +1,5 @@
-use usb_device::bus::UsbBus; 
+use stm32f1xx_hal::rcc;
+
 use usb_device::class_prelude::UsbBusAllocator;
 
 use stm32f1xx_hal::usb::UsbBus as UsbBusHal;
@@ -31,19 +32,13 @@ pub struct BoardPeripherals {
 pub fn init_rcc() -> BoardPeripherals {
     let dp = Peripherals::take().expect("cannot take peripherals");
     let mut flash = dp.FLASH.constrain();
-    let rcc = dp.RCC.constrain();
+    let mut rcc = dp.RCC.freeze(
+        rcc::Config::hse(8.MHz()).sysclk(48.MHz()).pclk1(24.MHz()),
+        &mut flash.acr,
+    );
 
-    let clocks = rcc
-        .cfgr
-        .use_hse(8_u32.MHz())
-        .sysclk(72_u32.MHz())
-        .pclk1(36_u32.MHz())
-        .freeze(&mut flash.acr);
-
-    assert!(clocks.usbclk_valid(), "USB-Takt konnte nicht stabil auf 48MHz konfiguriert werden!");
-
-    let mut gpioa = dp.GPIOA.split();
-    let mut gpioc = dp.GPIOC.split();
+    let gpioa = dp.GPIOA.split(&mut rcc);
+    let mut gpioc = dp.GPIOC.split(&mut rcc);
 
     let led = gpioc.pc6.into_push_pull_output(&mut gpioc.crl);
 
