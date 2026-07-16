@@ -5,12 +5,22 @@
 # also look at build.rs with sets extra flags:
 #  "-C", "link-arg=-Tlink.x" must not be set twice
 
-target = "thumbv7em-none-eabihf"
+[target.thumbv7m-none-eabi]
 rustflags = [
-  "--verbose"
+  "-D", "linker-messages",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+  "-C", "link-arg=--no-undefined",
 ]
+runner = "probe-rs run --chip STM32F103C8Tx"
 
 [target.thumbv7em-none-eabihf]
+rustflags = [
+  "-D", "linker-messages",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+  "-C", "link-arg=--no-undefined",
+]
 runner = "probe-rs run --chip STM32G474CEUx"
 
 [env]

@@ -18,6 +18,7 @@
       complete.rustc
       complete.llvm-tools
       targets.thumbv7em-none-eabihf.latest.rust-std
+      targets.thumbv7m-none-eabi.latest.rust-std
     ];
   in
     {

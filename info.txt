@@ -6,7 +6,9 @@ DEFMT_LOG=info  cargo run --bin hid_raw --features defmt  -- --speed 1000 --rtt-
 cargo tree -d
 
 cargo upgrade --dry-run  ## braucht cargo-edit tool
-RUSTFLAGS="--verbose" cargo build  --features defmt --bin hid-raw # alle typen ausschreiben
+
+
+
 
 cargo build --release --no-default-features # [features] eintrag in Cargo.toml ignorieren
 
@@ -39,3 +41,6 @@ repl:
 evcxr
 
 :dep rig_to_usb = { path = ".", default-features = false }
+
+
+cargo build -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi  --release
