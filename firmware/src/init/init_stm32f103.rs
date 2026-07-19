@@ -25,7 +25,7 @@ static USB_BUS_ALLOCATOR: StaticCell<UsbBusAllocator<BoardUsbBus>> = StaticCell:
 pub struct BoardPeripherals {
     pub _gpiob: GPIOB,
     pub _tim2: TIM2,
-    pub led: Pin<'C', 6, Output<PushPull>>,
+    pub led: Pin<'C',13, Output<PushPull>>,
     pub usb_bus: &'static UsbBusAllocator<BoardUsbBus>,
 }
 
@@ -40,7 +40,7 @@ pub fn init_rcc() -> BoardPeripherals {
     let gpioa = dp.GPIOA.split(&mut rcc);
     let mut gpioc = dp.GPIOC.split(&mut rcc);
 
-    let led = gpioc.pc6.into_push_pull_output(&mut gpioc.crl);
+    let led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
 
     let usb_peripheral = Peripheral {
         usb: dp.USB,
