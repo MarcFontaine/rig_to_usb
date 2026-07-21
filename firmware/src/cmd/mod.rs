@@ -3,6 +3,7 @@ use crate::hal::gpio::PinState;
 
 //use crate::bootloader::jump_to_st_bootloader;
 use crate::init::{BoardPeripherals};
+use crate::test::{test};
 
 use rig_to_usb_logic::cmd::Cmd;
 use rig_to_usb_logic::cmd::Cmd::*;
@@ -34,5 +35,6 @@ pub fn run_cmd(
 	LED{ value } => {board_peripherals.led.set_state(PinState::from(value));}
 	Error { code: _, message: _ } => {}
 	Success { value:_ } => {} //jump_to_st_bootloader();}
+	Test() => { test(); }
     }
 }

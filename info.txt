@@ -40,7 +40,6 @@ tests:
 repl:
 evcxr
 
-:dep rig_to_usb = { path = ".", default-features = false }
-
+:dep rig_to_usb_logic = { path = "shared/", default-features = false }
 
 cargo build -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi  --release

@@ -5,3 +5,18 @@ members = [
     "firmware",
     "shared"
 ]
+
+[profile.dev]
+opt-level = "z"
+lto = true
+panic = "abort"
+
+[profile.dev.package."*"]
+opt-level = "z"
+
+[profile.release]
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = 2

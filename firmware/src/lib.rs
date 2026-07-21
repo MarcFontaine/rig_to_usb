@@ -5,6 +5,7 @@ pub mod cmd;
 pub mod init;
 pub mod usb;
 pub mod main_loop;
+pub mod test;
 
 #[cfg(feature = "stm32g474")]
 pub mod hal {

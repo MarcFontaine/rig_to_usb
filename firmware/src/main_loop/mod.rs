@@ -4,6 +4,7 @@ use usbd_hid::hid_class::HIDClass;
 
 use crate::init::{BoardPeripherals};
 use crate::cmd::{decode_and_run};
+use cortex_m::peripheral::DWT;
 
 pub fn main_loop<B: UsbBus>
     (boardboard_peripherals: &mut BoardPeripherals
@@ -11,6 +12,7 @@ pub fn main_loop<B: UsbBus>
     ,hid: &mut HIDClass<'_, B>
     ) -> !
 {
+    let mut ping = DWT::cycle_count().wrapping_add(10*72000000);
     let mut rx_packet = [0u8; 64];
     defmt::info!("Starting Loop");
     loop {	
@@ -22,5 +24,9 @@ pub fn main_loop<B: UsbBus>
                 _ => {}
             }
         }
+	if ping.wrapping_sub(DWT::cycle_count()) > (1<<31) {
+            defmt::info!("Ping");
+	    ping = DWT::cycle_count().wrapping_add(10*72000000);
+	}
     }
 }

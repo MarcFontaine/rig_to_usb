@@ -18,22 +18,26 @@ use stm32f1xx_hal::flash::FlashExt;
 
 use static_cell::StaticCell;
 
+
 pub type BoardUsbBus = UsbBusHal<Peripheral>;
 
 static USB_BUS_ALLOCATOR: StaticCell<UsbBusAllocator<BoardUsbBus>> = StaticCell::new();
 
 pub struct BoardPeripherals {
     pub _gpiob: GPIOB,
-    pub _tim2: TIM2,
     pub led: Pin<'C',13, Output<PushPull>>,
     pub usb_bus: &'static UsbBusAllocator<BoardUsbBus>,
 }
 
 pub fn init_rcc() -> BoardPeripherals {
+    let mut cp = cortex_m::Peripherals::take().unwrap();
+    cp.DCB.enable_trace();
+    cp.DWT.enable_cycle_counter();
+
     let dp = Peripherals::take().expect("cannot take peripherals");
     let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.freeze(
-        rcc::Config::hse(8.MHz()).sysclk(48.MHz()).pclk1(24.MHz()),
+        rcc::Config::hse(8.MHz()).sysclk(72.MHz()).pclk1(36.MHz()),
         &mut flash.acr,
     );
 
@@ -53,7 +57,6 @@ pub fn init_rcc() -> BoardPeripherals {
 
     BoardPeripherals {
         _gpiob: dp.GPIOB,
-        _tim2: dp.TIM2,
         led,
         usb_bus: st_bus,
     }
