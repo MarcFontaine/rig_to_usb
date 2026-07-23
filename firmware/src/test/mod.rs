@@ -1,3 +1,4 @@
+#![allow(warnings)]
 use stm32f1xx_hal::rcc;
 use cortex_m::Peripherals;
 use crate::hal::stm32f1xx_hal::pac::GPIOC;
