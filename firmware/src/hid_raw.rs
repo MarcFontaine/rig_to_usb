@@ -15,8 +15,7 @@ fn main() -> ! {
     defmt::info!("Hello, USB-World!");
 
     let mut board_peripherals = init_rcc();
+    let mut my_usb = init_usb(board_peripherals.usb_bus);
 
-    let (mut usb_dev, mut hid) = init_usb(board_peripherals.usb_bus);
-
-    main_loop(&mut board_peripherals, &mut usb_dev, &mut hid);
+    main_loop(&mut board_peripherals, &mut my_usb);
 }

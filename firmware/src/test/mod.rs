@@ -1,7 +1,7 @@
 #![allow(warnings)]
-use stm32f1xx_hal::rcc;
+use crate::hal::rcc;
 use cortex_m::Peripherals;
-use crate::hal::stm32f1xx_hal::pac::GPIOC;
+use crate::hal::pac::GPIOC;
 
 pub fn test()
 {

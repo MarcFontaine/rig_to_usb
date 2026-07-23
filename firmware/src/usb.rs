@@ -8,9 +8,11 @@ use usb_device::prelude::UsbVidPid;
 use usb_device::prelude::StringDescriptors;
 use usb_device::LangID;
 
+pub type MyUsb<'a, B> = (UsbDevice<'a, B> , HIDClass<'a, B> );
+
 pub fn init_usb<'a, B>(
     usb_bus: &'a UsbBusAllocator<B>
-) -> (UsbDevice<'a, B>, HIDClass<'a, B>)
+) -> MyUsb<'a, B>
 where
     B: UsbBus
 {
