@@ -6,7 +6,6 @@ use stm32f1xx_hal::usb::UsbBus as UsbBusHal;
 use stm32f1xx_hal::usb::Peripheral;
 use stm32f1xx_hal::pac::Peripherals;
 use stm32f1xx_hal::pac::GPIOB;
-use stm32f1xx_hal::pac::TIM2;
 use stm32f1xx_hal::gpio::Pin;
 use stm32f1xx_hal::gpio::Output;
 use stm32f1xx_hal::gpio::PushPull;
@@ -18,6 +17,7 @@ use stm32f1xx_hal::flash::FlashExt;
 
 use static_cell::StaticCell;
 
+const SYSTEM_CLOCK_MHZ: u32 = 72;
 
 pub type BoardUsbBus = UsbBusHal<Peripheral>;
 
@@ -37,7 +37,7 @@ pub fn init_rcc() -> BoardPeripherals {
     let dp = Peripherals::take().expect("cannot take peripherals");
     let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.freeze(
-        rcc::Config::hse(8.MHz()).sysclk(72.MHz()).pclk1(36.MHz()),
+        rcc::Config::hse(8.MHz()).sysclk(SYSTEM_CLOCK_MHZ.MHz()).pclk1(36.MHz()),
         &mut flash.acr,
     );
 
