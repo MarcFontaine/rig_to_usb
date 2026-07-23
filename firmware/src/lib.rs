@@ -7,6 +7,7 @@ pub mod usb;
 pub mod poll_usb;
 pub mod main_loop;
 pub mod test;
+pub mod tasks;
 
 #[cfg(feature = "stm32g474")]
 pub mod hal {
@@ -30,6 +31,6 @@ pub mod hal {
 pub mod hal {
     pub use stm32f1xx_hal;
     pub use stm32f1xx_hal::gpio;
-    pub use stm32f1xx_hal::rcc;    
+    pub use stm32f1xx_hal::rcc;
     pub use stm32f1xx_hal::pac;
 }
