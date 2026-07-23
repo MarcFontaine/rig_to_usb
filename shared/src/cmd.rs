@@ -7,13 +7,15 @@ pub use defmt::{info, warn, error};
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Decode, Encode, Debug)]
 #[cbor(flat)]
+#[cfg_attr(feature = "std-json", derive(serde::Deserialize))]
+#[cfg_attr(feature = "std-json", serde(rename_all = "lowercase"))]
 pub enum Cmd {
     #[n(0)]
     StartBootLoader(),
     #[n(1)]
     LED{#[n(0)] value: bool},
     #[n(2)]
-    Test(),
+    Test,
     #[n(3)]
     TxOn{#[n(0)] time: u32},
 }
@@ -26,7 +28,7 @@ pub fn cbor_message_test() {
 
     let mut tx_buffer1 = [0u8; 64];
     let mut cursor1 = Cursor::new(&mut tx_buffer1[..]);
-    let msg_success = Test();
+    let msg_success = Test;
     info!("1. Teste: {:?}", msg_success);
     println!("1. Teste: {:?}", msg_success);    
     if let Ok(_encoded_s) = minicbor::encode(&msg_success, &mut cursor1) {

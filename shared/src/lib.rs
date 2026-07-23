@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(feature = "std-json"), no_std)]
 
 #[cfg(feature = "defmt")]
 pub use defmt::{info, warn, error};

@@ -19,6 +19,7 @@
       complete.llvm-tools
       targets.thumbv7em-none-eabihf.latest.rust-std
       targets.thumbv7m-none-eabi.latest.rust-std
+      targets.x86_64-unknown-linux-gnu.latest.rust-std
     ];
   in
     {

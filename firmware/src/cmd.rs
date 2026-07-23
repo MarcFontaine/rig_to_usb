@@ -38,7 +38,7 @@ pub fn run_cmd(
     match cmd {
 	StartBootLoader() => {} //jump_to_st_bootloader();}
 	LED{ value } => {board_peripherals.led.set_state(PinState::from(value));}
-	Test() => { }
+	Test => { }
 	TxOn{ time } => {
 	    board_peripherals.led.set_state(PinState::from(false));
 	    tasks.tx_off = schedule_timeout(time);

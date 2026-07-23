@@ -20,7 +20,7 @@ pub fn schedule_timeout (ms:u32) -> TimeOut
 {
     TimeOut {
 	enabled : true,
-	time : DWT::cycle_count().wrapping_add(ms*1000*SYSTEM_CLOCK_MHZ),
+	time : DWT::cycle_count().wrapping_add(ms * 1000 * SYSTEM_CLOCK_MHZ),
     }
 }
 

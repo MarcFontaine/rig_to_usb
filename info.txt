@@ -33,8 +33,7 @@ Die Tastenkombination für den Bootloader:
 
 
 tests:
-0x82,0x01,0xf4 LED Off
-0x82,0x01,0xf5 LED On
+echo '{"txon":{ "time": 10000} }' | ./target/x86_64-unknown-linux-gnu/debug/stdin_to_cbor | hexdump -X
 
 
 repl:
@@ -43,3 +42,4 @@ evcxr
 :dep rig_to_usb_logic = { path = "shared/", default-features = false }
 
 cargo build -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi  --release
+
