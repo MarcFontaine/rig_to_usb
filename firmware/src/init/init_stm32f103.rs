@@ -17,7 +17,7 @@ use stm32f1xx_hal::flash::FlashExt;
 
 use static_cell::StaticCell;
 
-const SYSTEM_CLOCK_MHZ: u32 = 72;
+pub const SYSTEM_CLOCK_MHZ: u32 = 72;
 
 pub type BoardUsbBus = UsbBusHal<Peripheral>;
 

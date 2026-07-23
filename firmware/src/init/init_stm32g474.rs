@@ -2,6 +2,8 @@ use crate::hal::{*};
 use usb_device::class_prelude::UsbBusAllocator;
 use static_cell::StaticCell;
 
+pub const SYSTEM_CLOCK_MHZ: u32 = 150;
+
 pub type BoardUsbBus = UsbBus<Peripheral<Pin<'A', 11, Alternate<14>>, Pin<'A', 12, Alternate<14>>>>;
 static USB_BUS_ALLOCATOR: StaticCell<UsbBusAllocator<BoardUsbBus>> = StaticCell::new();
 
