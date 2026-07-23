@@ -38,9 +38,11 @@ pub fn run_cmd(
     match cmd {
 	StartBootLoader() => {} //jump_to_st_bootloader();}
 	LED{ value } => {board_peripherals.led.set_state(PinState::from(value));}
-	Error { code: _, message: _ } => {}
-	Success { value:_ } => {} //jump_to_st_bootloader();}
-	Test() => { tasks.ping = schedule_timeout(1000)}
+	Test() => { }
+	TxOn{ time } => {
+	    board_peripherals.led.set_state(PinState::from(false));
+	    tasks.tx_off = schedule_timeout(time);
+	}
     }
     tasks
 }

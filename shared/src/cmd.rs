@@ -13,14 +13,9 @@ pub enum Cmd {
     #[n(1)]
     LED{#[n(0)] value: bool},
     #[n(2)]
-    Success{#[n(0)] value: u32},
-    #[n(3)]
-    Error {
-        #[n(0)] code: u32,
-        #[n(1)] message: u32,
-    },
-    #[n(4)]
     Test(),
+    #[n(3)]
+    TxOn{#[n(0)] time: u32},
 }
 
 use Cmd::*;

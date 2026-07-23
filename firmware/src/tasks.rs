@@ -1,4 +1,5 @@
 use crate::init::{BoardPeripherals, SYSTEM_CLOCK_MHZ};
+use crate::hal::gpio::PinState;
 use cortex_m::peripheral::DWT;
 
 #[derive(Debug)]
@@ -7,9 +8,12 @@ pub struct TimeOut {
     pub time: u32,
 }
 
+pub const TIME_OUT_DISABLED:TimeOut = TimeOut { enabled: false, time: 0};
+
 #[derive(Debug)]
 pub struct Tasks {
-    pub ping: TimeOut
+    pub ping: TimeOut,
+    pub tx_off: TimeOut
 }
 
 pub fn schedule_timeout (ms:u32) -> TimeOut
@@ -33,13 +37,13 @@ pub fn check_timeout
 pub fn init_tasks() -> Tasks
 {
     Tasks {
-	ping: schedule_timeout(10000)
+	ping: TIME_OUT_DISABLED,
+	tx_off: TIME_OUT_DISABLED
     }
 }
 
-
 pub fn run_pending_tasks
-    (_board_peripherals: &mut BoardPeripherals
+    (board_peripherals: &mut BoardPeripherals
     , mut tasks : Tasks)
     -> Tasks
 {
@@ -48,6 +52,11 @@ pub fn run_pending_tasks
     if is_ping {
 	defmt::info!("Ping");
 	tasks.ping = schedule_timeout(10000);
+    }
+    let is_tx_off;
+    (tasks.tx_off, is_tx_off) = check_timeout(tasks.tx_off);
+    if is_tx_off {
+	board_peripherals.led.set_state(PinState::from(true));
     }
     tasks
 }
