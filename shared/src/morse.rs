@@ -1,10 +1,9 @@
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-
-pub enum PinState {    
+pub enum MorseState {
     High,
     Low,
 }
-use PinState::*;
+use MorseState::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Symbol {    
@@ -90,7 +89,7 @@ pub enum CharState {
 use CharState::*;
 
 // pause_len must be >= 1
-pub fn next_pin_state_char(pause_len: u8, s: CharState) -> Option<(PinState, CharState)>
+pub fn next_pin_state_char(pause_len: u8, s: CharState) -> Option<(MorseState, CharState)>
 {
     match s {
 	S([]) => None,
@@ -127,30 +126,57 @@ pub fn test()
     println!("<-");
 }
 
+const MORSE_BUFFER_SIZE: usize = 32;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct LineState {
-    state: CharState,
-    rest_line: Option<&'static [u8]>
+    pub state: CharState,
+    pub char_buffer: [u8; MORSE_BUFFER_SIZE],
+    pub next_char: usize,
 }
 
-pub fn next_pin_state(ls: LineState) -> Option<(PinState, LineState)>
-{
-    match ( ls.rest_line, next_pin_state_char(3, ls.state) ) {
-	(_,  Some((level, next))) => Some((level, LineState { state: next, rest_line: ls.rest_line})),
-	(Some([]), None) => None, // todo: fix add end of word pause
-	(Some([ c, r @ ..]), None) => next_pin_state( LineState { state: S(morse_char(*c)), rest_line: Some(r)}),
-	(None, None) => None
+impl LineState {
+    pub fn empty() -> Self {
+	LineState {
+	    state: S(&[]),
+            char_buffer: [0u8; MORSE_BUFFER_SIZE],
+            next_char: 0,
+	}
+    }
+    pub fn init(txt: &[u8]) -> Self {
+	if txt.len() > MORSE_BUFFER_SIZE {
+            panic! ("LineState ");
+        }
+	let mut buffer = [0u8; MORSE_BUFFER_SIZE];
+        buffer[..txt.len()].copy_from_slice(txt);
+	buffer[..txt.len()].reverse();
+        LineState {
+	    state: S(&[]),
+            char_buffer: buffer,
+            next_char: txt.len(),
+        }
     }
 }
 
+pub fn next_pin_state(ls: LineState) -> Option<(MorseState, LineState)>
+{
+    match ( ls.next_char, next_pin_state_char(3, ls.state) ) {
+	(_,  Some((level, next))) => Some(
+	    (level, LineState { state: next, char_buffer: ls.char_buffer, next_char: ls.next_char})),
+	(0, None) => None,
+	(i, None) => next_pin_state(
+	    LineState {
+		state: S(morse_char(ls.char_buffer[i - 1])),
+		char_buffer: ls.char_buffer,
+		next_char: ls.next_char - 1,
+	    }),
+    }
+}
 
 pub fn test2()
 {
     print!("->");
-    let mut s = LineState {
-	state: S(&[]),
-	rest_line: Some(b"Hello")
-    };
+    let mut s = LineState::init (b"Hello");
 
     loop {
 	match next_pin_state(s) {

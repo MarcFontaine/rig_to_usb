@@ -3,11 +3,11 @@ use crate::hal::gpio::PinState;
 
 //use crate::bootloader::jump_to_st_bootloader;
 use crate::init::{BoardPeripherals};
-//use crate::test::{test};
 use crate::tasks::{Tasks, schedule_timeout};
 
 use rig_to_usb_logic::cmd::Cmd;
 use rig_to_usb_logic::cmd::Cmd::*;
+use rig_to_usb_logic::morse::LineState;
 
 pub fn decode_and_run(
     board_peripherals: &mut BoardPeripherals,
@@ -42,6 +42,10 @@ pub fn run_cmd(
 	TxOn{ time } => {
 	    board_peripherals.led.set_state(PinState::from(false));
 	    tasks.tx_off = schedule_timeout(time);
+	}
+	SendMorse{ txt } => {
+	    tasks.morse_state = Some(LineState::init(txt));
+            tasks.morse_timer = schedule_timeout(100);
 	}
     }
     tasks

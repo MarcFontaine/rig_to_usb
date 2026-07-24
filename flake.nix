@@ -33,6 +33,7 @@
         toolchain
         probe-rs-tools
         cargo-binutils
+        cargo-bloat
         flip-link
         cargo-edit
         rust-analyzer
