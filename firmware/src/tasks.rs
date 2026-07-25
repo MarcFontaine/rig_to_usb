@@ -32,7 +32,7 @@ pub fn next_timeout (t: TimeOut, ms:u32) -> TimeOut
 {
     TimeOut {
 	enabled : true,
-	time : t.time + ms * 1000 * SYSTEM_CLOCK_MHZ,
+	time : t.time.wrapping_add(ms * 1000 * SYSTEM_CLOCK_MHZ),
     }
 }
 
