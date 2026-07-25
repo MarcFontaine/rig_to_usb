@@ -5,6 +5,7 @@ use usb_device::bus::{UsbBus, UsbBusAllocator};
 use usb_device::prelude::UsbDevice;
 use usb_device::prelude::UsbDeviceBuilder;
 use usb_device::prelude::UsbVidPid;
+use usb_device::device::UsbRev;
 use usb_device::prelude::StringDescriptors;
 use usb_device::LangID;
 
@@ -34,7 +35,8 @@ where
                 .product("RigToUSB")
                 .serial_number("TEST")
         ])
-	.expect("Cannot set USB String Descriptors") 
+	.expect("Cannot set USB String Descriptors")
+	.usb_rev(UsbRev::Usb200)
 	.device_class(0x00)
 	.build();
   (usb_dev, hid)
