@@ -1,3 +1,5 @@
+use ringbuffer::{ConstGenericRingBuffer, RingBuffer};
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MorseState {
     High,
@@ -126,50 +128,45 @@ pub fn test()
     println!("<-");
 }
 
-const MORSE_BUFFER_SIZE: usize = 32;
+const MORSE_BUFFER_SIZE: usize = 80;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LineState {
     pub state: CharState,
-    pub char_buffer: [u8; MORSE_BUFFER_SIZE],
-    pub next_char: usize,
+    pub chars: ConstGenericRingBuffer::<u8, MORSE_BUFFER_SIZE>,
 }
 
 impl LineState {
     pub fn empty() -> Self {
 	LineState {
 	    state: S(&[]),
-            char_buffer: [0u8; MORSE_BUFFER_SIZE],
-            next_char: 0,
+            chars : ConstGenericRingBuffer::<u8, MORSE_BUFFER_SIZE>::new(),
 	}
     }
     pub fn init(txt: &[u8]) -> Self {
-	if txt.len() > MORSE_BUFFER_SIZE {
-            panic! ("LineState ");
-        }
-	let mut buffer = [0u8; MORSE_BUFFER_SIZE];
-        buffer[..txt.len()].copy_from_slice(txt);
-	buffer[..txt.len()].reverse();
-        LineState {
-	    state: S(&[]),
-            char_buffer: buffer,
-            next_char: txt.len(),
-        }
+	let mut l = LineState::empty();
+	l.chars.extend(txt.iter().copied());
+        l
+    }
+    pub fn append(&mut self, txt: &[u8])
+    {
+	self.chars.extend(txt.iter().copied());
     }
 }
 
-pub fn next_pin_state(ls: LineState) -> Option<(MorseState, LineState)>
+pub fn next_pin_state(mut ls: LineState) -> Option<(MorseState, LineState)>
 {
-    match ( ls.next_char, next_pin_state_char(3, ls.state) ) {
-	(_,  Some((level, next))) => Some(
-	    (level, LineState { state: next, char_buffer: ls.char_buffer, next_char: ls.next_char})),
-	(0, None) => None,
-	(i, None) => next_pin_state(
-	    LineState {
-		state: S(morse_char(ls.char_buffer[i - 1])),
-		char_buffer: ls.char_buffer,
-		next_char: ls.next_char - 1,
-	    }),
+    match ( ls.chars.peek(), next_pin_state_char(3, ls.state) ) {
+	(_,  Some((level, next))) => {
+	    ls.state = next;
+	    Some((level,ls))
+	}
+	(None, None) => None,
+	(Some(char), None) => {
+	    ls.state = S(morse_char(*char));
+	    ls.chars.dequeue();
+	    next_pin_state(ls)
+	}
     }
 }
 

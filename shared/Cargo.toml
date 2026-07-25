@@ -13,6 +13,7 @@ minicbor = { version = "2.2", features = ["derive"] }
 defmt = { version = "0.3", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true}
 serde_json = { version = "1.0", optional = true }
+ringbuffer = { version = "0.16.0", default-features = false }
 
 [[bin]]
 name = "stdin_to_cbor"
