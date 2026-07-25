@@ -1,7 +1,8 @@
 #![no_std]
 #![no_main]
 
-use panic_halt as _;
+use panic_probe as _; // exit with error
+// use panic_halt as _; loop forever
 use cortex_m_rt::entry;
 
 use defmt_rtt as _;
