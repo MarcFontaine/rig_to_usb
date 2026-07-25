@@ -47,6 +47,16 @@ pub fn run_cmd(
 	    tasks.morse_state = Some(LineState::init(txt));
             tasks.morse_timer = schedule_timeout(100);
 	}
+	AppendMorse{ txt } => match &mut tasks.morse_state {
+	    None => {
+		tasks.morse_state = Some(LineState::init(txt));
+		tasks.morse_timer = schedule_timeout(100);
+	    }
+	    Some(s) => {
+		s.append(txt);
+	    }
+	}
+	Panic => panic!("Panic command test")
     }
     tasks
 }

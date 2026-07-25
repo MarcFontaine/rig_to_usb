@@ -20,6 +20,10 @@ pub enum Cmd<'a> {
     TxOn{#[n(0)] time: u32},
     #[n(4)]
     SendMorse{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    #[n(5)]
+    AppendMorse{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    #[n(6)]
+    Panic
 }
 
 pub fn encode_test(cmd: Cmd)

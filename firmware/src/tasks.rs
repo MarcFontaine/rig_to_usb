@@ -82,12 +82,12 @@ pub fn run_pending_tasks
 	    Some((High, n)) => {
                 board_peripherals.led.set_state(PinState::from(false));
 		tasks.morse_state = Some(n);
-		tasks.morse_timer = next_timeout(tasks.morse_timer, 100);
+		tasks.morse_timer = next_timeout(tasks.morse_timer,100);
 	    }
 	    Some((Low, n)) => {
                 board_peripherals.led.set_state(PinState::from(true));
 		tasks.morse_state = Some(n);
-		tasks.morse_timer = next_timeout(tasks.morse_timer, 100);
+		tasks.morse_timer = next_timeout(tasks.morse_timer,100);
 	    }
 	}
     }
