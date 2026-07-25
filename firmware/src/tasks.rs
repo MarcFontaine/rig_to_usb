@@ -18,6 +18,7 @@ pub struct Tasks {
     pub tx_off: TimeOut,
     pub morse_timer: TimeOut,
     pub morse_state: Option<LineState>,
+    pub morse_ditlen: u16,
 }
 
 pub fn schedule_timeout (ms:u32) -> TimeOut
@@ -53,6 +54,7 @@ pub fn init_tasks() -> Tasks
 	tx_off: TIME_OUT_DISABLED,
 	morse_timer: TIME_OUT_DISABLED,
         morse_state: None,
+	morse_ditlen: 100,
     }
 }
 
@@ -82,12 +84,12 @@ pub fn run_pending_tasks
 	    Some((High, n)) => {
                 board_peripherals.led.set_state(PinState::from(false));
 		tasks.morse_state = Some(n);
-		tasks.morse_timer = next_timeout(tasks.morse_timer,100);
+		tasks.morse_timer = next_timeout(tasks.morse_timer, tasks.morse_ditlen.into());
 	    }
 	    Some((Low, n)) => {
                 board_peripherals.led.set_state(PinState::from(true));
 		tasks.morse_state = Some(n);
-		tasks.morse_timer = next_timeout(tasks.morse_timer,100);
+		tasks.morse_timer = next_timeout(tasks.morse_timer, tasks.morse_ditlen.into());
 	    }
 	}
     }

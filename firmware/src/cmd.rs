@@ -36,27 +36,28 @@ pub fn run_cmd(
     -> Tasks
 {
     match cmd {
+	Panic => panic!("Panic command test"),
+	Test => { }
 	StartBootLoader() => {} //jump_to_st_bootloader();}
 	LED{ value } => {board_peripherals.led.set_state(PinState::from(value));}
-	Test => { }
 	TxOn{ time } => {
 	    board_peripherals.led.set_state(PinState::from(false));
 	    tasks.tx_off = schedule_timeout(time);
 	}
-	SendMorse{ txt } => {
+	MorseSpeed{ ditlen } => { tasks.morse_ditlen = ditlen }
+	MorseSend{ txt } => {
 	    tasks.morse_state = Some(LineState::init(txt));
-            tasks.morse_timer = schedule_timeout(100);
+            tasks.morse_timer = schedule_timeout(tasks.morse_ditlen.into());
 	}
-	AppendMorse{ txt } => match &mut tasks.morse_state {
+	MorseAppend{ txt } => match &mut tasks.morse_state {
 	    None => {
 		tasks.morse_state = Some(LineState::init(txt));
-		tasks.morse_timer = schedule_timeout(100);
+		tasks.morse_timer = schedule_timeout(tasks.morse_ditlen.into());
 	    }
 	    Some(s) => {
 		s.append(txt);
 	    }
 	}
-	Panic => panic!("Panic command test")
     }
     tasks
 }

@@ -11,19 +11,21 @@ pub use defmt::{info, warn, error};
 #[cfg_attr(feature = "std-json", serde(rename_all = "lowercase"))]
 pub enum Cmd<'a> {
     #[n(0)]
-    StartBootLoader(),
+    Panic,
     #[n(1)]
-    LED{#[n(0)] value: bool},
-    #[n(2)]
     Test,
+    #[n(2)]
+    StartBootLoader(),
     #[n(3)]
-    TxOn{#[n(0)] time: u32},
+    LED{#[n(0)] value: bool},
     #[n(4)]
-    SendMorse{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    TxOn{#[n(0)] time: u32},
     #[n(5)]
-    AppendMorse{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    MorseSpeed{#[n(0)] ditlen: u16},
     #[n(6)]
-    Panic
+    MorseSend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    #[n(7)]
+    MorseAppend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
 }
 
 pub fn encode_test(cmd: Cmd)
