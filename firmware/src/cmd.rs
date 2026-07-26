@@ -1,9 +1,9 @@
 use defmt_rtt as _;
 use crate::hal::gpio::PinState;
 
-//use crate::bootloader::jump_to_st_bootloader;
+use crate::bootloader::jump_to_bootloader;
 use crate::init::{BoardPeripherals};
-use crate::tasks::{Tasks, schedule_timeout};
+use crate::tasks::{Tasks, schedule_timeout, TIME_OUT_DISABLED};
 
 use rig_to_usb_logic::cmd::Cmd;
 use rig_to_usb_logic::cmd::Cmd::*;
@@ -38,8 +38,14 @@ pub fn run_cmd(
     match cmd {
 	Panic => panic!("Panic command test"),
 	Test => { }
-	StartBootLoader() => {} //jump_to_st_bootloader();}
-	LED{ value } => {board_peripherals.led.set_state(PinState::from(value));}
+	StartBootLoader => { jump_to_bootloader(); }
+	LED{ value } => {
+	    board_peripherals.led.set_state(PinState::from(value));
+	    tasks.led = TIME_OUT_DISABLED;
+	}
+	LEDBlink{ interval } => {
+	    tasks.led = schedule_timeout(interval.into());
+	}
 	TxOn{ time } => {
 	    board_peripherals.led.set_state(PinState::from(false));
 	    tasks.tx_off = schedule_timeout(time);

@@ -15,6 +15,9 @@ pub const TIME_OUT_DISABLED:TimeOut = TimeOut { enabled: false, time: 0};
 #[derive(Debug)]
 pub struct Tasks {
     pub ping: TimeOut,
+    pub led: TimeOut,
+    pub led_state: bool,
+    pub led_interval: u16,
     pub tx_off: TimeOut,
     pub morse_timer: TimeOut,
     pub morse_state: Option<LineState>,
@@ -51,10 +54,13 @@ pub fn init_tasks() -> Tasks
 {
     Tasks {
 	ping: TIME_OUT_DISABLED,
+	led: schedule_timeout(1000),
+	led_state: false,
+	led_interval: 1000,
 	tx_off: TIME_OUT_DISABLED,
 	morse_timer: TIME_OUT_DISABLED,
         morse_state: None,
-	morse_ditlen: 100,
+	morse_ditlen: 60, // 60ms -> 20WPM
     }
 }
 
@@ -68,6 +74,13 @@ pub fn run_pending_tasks
     if is_ping {
 	defmt::info!("Ping");
 	tasks.ping = schedule_timeout(10000);
+    }
+    let is_led;
+    (tasks.led, is_led) = check_timeout(tasks.led);
+    if is_led {
+	tasks.led = schedule_timeout(tasks.led_interval.into());
+	tasks.led_state = !tasks.led_state;
+	board_peripherals.led.set_state(PinState::from(tasks.led_state));
     }
     let is_tx_off;
     (tasks.tx_off, is_tx_off) = check_timeout(tasks.tx_off);

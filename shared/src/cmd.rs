@@ -15,16 +15,18 @@ pub enum Cmd<'a> {
     #[n(1)]
     Test,
     #[n(2)]
-    StartBootLoader(),
+    StartBootLoader,
     #[n(3)]
     LED{#[n(0)] value: bool},
     #[n(4)]
-    TxOn{#[n(0)] time: u32},
+    LEDBlink{#[n(0)] interval: u32},
     #[n(5)]
-    MorseSpeed{#[n(0)] ditlen: u16},
+    TxOn{#[n(0)] time: u32},
     #[n(6)]
-    MorseSend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    MorseSpeed{#[n(0)] ditlen: u16},
     #[n(7)]
+    MorseSend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    #[n(8)]
     MorseAppend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
 }
 
