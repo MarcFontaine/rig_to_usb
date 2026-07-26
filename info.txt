@@ -16,7 +16,8 @@ cargo build --release --no-default-features # [features] eintrag in Cargo.toml i
 bootloader:
 dfu-util -l
 * firmware muss als release gebaut werden
-cargo-objcopy --release --bin hid-raw -- -O binary firmware.bin
+cargo-objcopy -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi --profile release -- -O binary firmware.bin
+
 dfu-util -a 0 -d 0483:df11 -s 0x08000000:leave -D firmware.bin
 * ACHTUNG !! probe-rs muss die richtige firmware übergeben werden:
 target/thumbv7em-none-eabihf/release/hid-raw

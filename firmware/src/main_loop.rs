@@ -13,6 +13,7 @@ pub fn main_loop<'a, B: UsbBus>
     let mut tasks = init_tasks();
     defmt::info!("Starting Loop");
     loop {
+	board_peripherals.watchdog.feed();
 	tasks = poll_usb(board_peripherals, my_usb, tasks);
 	tasks = run_pending_tasks(board_peripherals, tasks);
     }

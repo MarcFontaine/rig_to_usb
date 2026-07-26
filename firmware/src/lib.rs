@@ -1,6 +1,7 @@
 #![no_std]
 
-//pub mod bootloader;
+pub mod stm32_dfu_bootloader;
+pub use stm32_dfu_bootloader as bootloader;
 pub mod cmd;
 pub mod init;
 pub mod usb;
