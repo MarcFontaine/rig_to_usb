@@ -12,10 +12,10 @@ use rig_to_usb::init::{init_rcc};
 use rig_to_usb::main_loop::{main_loop};
 
 use rig_to_usb::usb::{init_usb};
-use rig_to_usb::bootloader::{jump_to_bootloader_flag};
+use rig_to_usb::bootloader::{set_jump_to_bootloader_flag};
 #[entry]
 fn main() -> ! {
-    jump_to_bootloader_flag();
+    set_jump_to_bootloader_flag();
     defmt::info!("Hello, USB-World!");
 
     let mut board_peripherals = init_rcc();

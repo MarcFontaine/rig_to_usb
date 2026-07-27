@@ -5,16 +5,22 @@ use core::sync::atomic::{AtomicU32, Ordering};
   
 static BOOTLOADER_TAG: [AtomicU32; 2] = [AtomicU32::new(0), AtomicU32::new(0)];
 
-pub fn jump_to_bootloader_flag()
+pub fn set_jump_to_bootloader_flag()
 {
     BOOTLOADER_TAG[0].store(0xDEAD_BEEF, Ordering::Relaxed);
     BOOTLOADER_TAG[1].store(0xCC00_FFEE, Ordering::Relaxed);    
 }
 
+pub fn unset_jump_to_bootloader_flag()
+{
+    BOOTLOADER_TAG[0].store(0x0000_0000, Ordering::Relaxed);
+    BOOTLOADER_TAG[1].store(0x0000_0000, Ordering::Relaxed);
+}
+
 pub fn jump_to_bootloader() -> !
 {
     defmt::info!("Resetting into Bootloader");    
-    jump_to_bootloader_flag();
+    set_jump_to_bootloader_flag();
     panic!("Panic halting CPU to trigger watchdog");
     // statt panic loop { cortex_m::asm::wfi(); } 
 }
