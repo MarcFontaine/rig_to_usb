@@ -1,7 +1,8 @@
-use stm32f1xx_hal::rcc;
+use cortex_m::asm::delay;
 
 use usb_device::class_prelude::UsbBusAllocator;
 
+use stm32f1xx_hal::rcc;
 use stm32f1xx_hal::usb::UsbBus as UsbBusHal;
 use stm32f1xx_hal::usb::Peripheral;
 use stm32f1xx_hal::pac::Peripherals;
@@ -9,9 +10,9 @@ use stm32f1xx_hal::pac::GPIOB;
 use stm32f1xx_hal::gpio::Pin;
 use stm32f1xx_hal::gpio::Output;
 use stm32f1xx_hal::gpio::PushPull;
+use stm32f1xx_hal::gpio::PinState;
 use stm32f1xx_hal::prelude::_stm32_hal_rcc_RccExt;
 use stm32f1xx_hal::gpio::GpioExt;
-
 use stm32f1xx_hal::prelude::_fugit_RateExtU32;
 use stm32f1xx_hal::prelude::_fugit_ExtU32;
 use stm32f1xx_hal::flash::FlashExt;
@@ -32,6 +33,11 @@ pub struct BoardPeripherals {
     pub usb_bus: &'static UsbBusAllocator<BoardUsbBus>,
 }
 
+fn delay_50ms(_p: &mut Pin<'A', 12, Output<PushPull>>) -> ()
+{
+    delay( 50*1000*SYSTEM_CLOCK_MHZ )
+}
+
 pub fn init_rcc() -> BoardPeripherals {
     let mut cp = cortex_m::Peripherals::take().unwrap();
     cp.DCB.enable_trace();
@@ -48,10 +54,11 @@ pub fn init_rcc() -> BoardPeripherals {
         &mut flash.acr,
     );
 
-    let gpioa = dp.GPIOA.split(&mut rcc);
+    let mut gpioa = dp.GPIOA.split(&mut rcc);
     let mut gpioc = dp.GPIOC.split(&mut rcc);
 
     let led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
+    gpioa.pa12.as_push_pull_output_with_state(&mut gpioa.crh, PinState::Low, delay_50ms );
 
     let usb_peripheral = Peripheral {
         usb: dp.USB,
