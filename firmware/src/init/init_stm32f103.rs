@@ -44,8 +44,11 @@ pub fn init_rcc() -> BoardPeripherals {
     cp.DWT.enable_cycle_counter();
 
     let dp = Peripherals::take().expect("cannot take peripherals");
-    let mut watchdog = IndependentWatchdog::new(dp.IWDG);
 
+    // bugfix !! start watchdog twice
+    let mut watchdog = IndependentWatchdog::new(dp.IWDG);
+    watchdog.start(10000_u32.millis());
+    delay( 500*SYSTEM_CLOCK_MHZ );
     watchdog.start(10000_u32.millis());
 
     let mut flash = dp.FLASH.constrain();
