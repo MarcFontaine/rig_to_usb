@@ -85,7 +85,7 @@ pub fn run_pending_tasks
     if is_led {
 	tasks.led = schedule_timeout(clock, tasks.led_interval.into());
 	tasks.led_state = !tasks.led_state;
-	board_peripherals.led.set_state(PinState::from(tasks.led_state));
+	board_peripherals.led.led_off();
     }
     let is_radio_off;
     (tasks.radio_off, is_radio_off) = check_timeout(clock, tasks.radio_off);

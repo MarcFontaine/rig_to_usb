@@ -46,7 +46,7 @@ pub fn run_cmd(
 	}
 	StartBootLoader => { jump_to_bootloader(); }
 	LED{ value } => {
-	    board_peripherals.led.set_state(PinState::from(value));
+	    board_peripherals.led.set(value);
 	    tasks.led = TIME_OUT_DISABLED;
 	}
 	LEDBlink{ interval } => {
