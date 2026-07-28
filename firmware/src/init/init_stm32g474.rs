@@ -1,16 +1,18 @@
+use cortex_m::asm::delay;
+
 use crate::hal::{*};
 use usb_device::class_prelude::UsbBusAllocator;
 use static_cell::StaticCell;
 
 pub const SYSTEM_CLOCK_MHZ: u32 = 150;
+use crate::pins;
 
 pub type BoardUsbBus = UsbBus<Peripheral<Pin<'A', 11, Alternate<14>>, Pin<'A', 12, Alternate<14>>>>;
 static USB_BUS_ALLOCATOR: StaticCell<UsbBusAllocator<BoardUsbBus>> = StaticCell::new();
 
 pub struct BoardPeripherals {
-    pub _gpiob: GPIOB,
-    pub _tim2: TIM2,
-    pub led: Pin<'C', 6, Output>,
+    pub watchdog: IndependentWatchdog,
+    pub led: pins::LED,
     pub usb_bus: &'static UsbBusAllocator<BoardUsbBus>,
 }
 
@@ -31,7 +33,12 @@ pub fn init_rcc() -> BoardPeripherals
 
     let mut rcc = dp.RCC.freeze(config, pwr);
     rcc.enable_hsi48();
-    let led = dp.GPIOC.split(&mut rcc).pc6.into_push_pull_output();
+
+    // TODO: test watchdog
+    let mut watchdog = IndependentWatchdog::new(dp.IWDG);
+    watchdog.start(10000_u32.millis());
+    delay( 500*SYSTEM_CLOCK_MHZ );
+    watchdog.start(10000_u32.millis());
 
     let gpioa = dp.GPIOA.split(&mut rcc);
     let usb_dm = gpioa.pa11.into_alternate();
@@ -45,10 +52,9 @@ pub fn init_rcc() -> BoardPeripherals
     let raw = UsbBus::new(usb_peripheral);
     let st_bus = USB_BUS_ALLOCATOR.init(raw);
 
-     BoardPeripherals {
-        _gpiob: dp.GPIOB,
-        _tim2: dp.TIM2,
-	led: led,
+    BoardPeripherals {
+        watchdog: watchdog,
+	led: dp.GPIOC.split(&mut rcc).pc6.into_push_pull_output(),
 	usb_bus: st_bus
     }
 }

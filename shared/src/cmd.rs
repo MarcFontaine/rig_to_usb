@@ -11,13 +11,13 @@ pub use defmt::{info, warn, error};
 #[cfg_attr(feature = "std-json", serde(rename_all = "lowercase"))]
 pub enum Cmd<'a> {
     #[n(0)]
-    Panic,
+    StartBootLoader, // Keep StartBootLoader at n(0)
     #[n(1)]
-    Test,
+    Panic,
     #[n(2)]
-    Reset,
+    Test,
     #[n(3)]
-    StartBootLoader,
+    Reset,
     #[n(4)]
     LED{#[n(0)] value: bool},
     #[n(5)]

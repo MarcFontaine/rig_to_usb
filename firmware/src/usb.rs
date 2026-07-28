@@ -1,3 +1,4 @@
+use git_version::git_version;
 use usbd_hid::{hid_class::HIDClass};
 use usbd_hid::descriptor::generator_prelude::*;
 
@@ -8,6 +9,8 @@ use usb_device::prelude::UsbVidPid;
 use usb_device::device::UsbRev;
 use usb_device::prelude::StringDescriptors;
 use usb_device::LangID;
+
+const VERSION: &str = git_version!(prefix = "git:", cargo_prefix = "cargo:", fallback = "unknown");
 
 pub type MyUsb<'a, B> = (UsbDevice<'a, B> , HIDClass<'a, B> );
 
@@ -33,7 +36,7 @@ where
            StringDescriptors::new(LangID::EN)
                 .manufacturer("DM1MF")
                 .product("RigToUSB")
-                .serial_number("TEST")
+                .serial_number(VERSION)
         ])
 	.expect("Cannot set USB String Descriptors")
 	.usb_rev(UsbRev::Usb200)
