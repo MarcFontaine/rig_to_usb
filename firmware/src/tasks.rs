@@ -1,13 +1,12 @@
 use crate::init::{BoardPeripherals, SYSTEM_CLOCK_MHZ};
 use crate::hal::gpio::PinState;
-use cortex_m::peripheral::DWT;
 use rig_to_usb_logic::morse::{LineState, next_pin_state };
 use rig_to_usb_logic::morse::MorseState::*;
 
 #[derive(Debug)]
 pub struct TimeOut {
     pub enabled: bool,
-    pub time: u32,
+    pub time: u64,
 }
 
 pub const TIME_OUT_DISABLED:TimeOut = TimeOut { enabled: false, time: 0};
@@ -24,11 +23,11 @@ pub struct Tasks {
     pub morse_ditlen: u16,
 }
 
-pub fn schedule_timeout (ms:u32) -> TimeOut
+pub fn schedule_timeout (clock:u64, ms:u32) -> TimeOut
 {
     TimeOut {
 	enabled : true,
-	time : DWT::cycle_count().wrapping_add(ms * 1000 * SYSTEM_CLOCK_MHZ),
+	time : clock + (ms as u64) * 1000 * (SYSTEM_CLOCK_MHZ as u64),
     }
 }
 
@@ -36,15 +35,16 @@ pub fn next_timeout (t: TimeOut, ms:u32) -> TimeOut
 {
     TimeOut {
 	enabled : true,
-	time : t.time.wrapping_add(ms * 1000 * SYSTEM_CLOCK_MHZ),
+	time : t.time + (ms as u64) * 1000 * (SYSTEM_CLOCK_MHZ as u64),
     }
 }
 
 pub fn check_timeout
-    (t: TimeOut)
+    (clock: u64,
+     t: TimeOut)
      -> (TimeOut, bool)
 {
-    if t.enabled && t.time.wrapping_sub(DWT::cycle_count()) > (1<<31) {
+    if t.enabled && clock > t.time {
 	return (TimeOut {enabled: false, time: t.time}, true);
     }
     (t, false)
@@ -54,7 +54,7 @@ pub fn init_tasks() -> Tasks
 {
     Tasks {
 	ping: TIME_OUT_DISABLED,
-	led: schedule_timeout(1000),
+	led: schedule_timeout(0, 1000),
 	led_state: false,
 	led_interval: 1000,
 	tx_off: TIME_OUT_DISABLED,
@@ -65,30 +65,32 @@ pub fn init_tasks() -> Tasks
 }
 
 pub fn run_pending_tasks
-    (board_peripherals: &mut BoardPeripherals
-    , mut tasks : Tasks)
+    (board_peripherals: &mut BoardPeripherals,
+     mut tasks: Tasks,
+     clock: u64
+    )
     -> Tasks
 {
     let is_ping;
-    (tasks.ping, is_ping) = check_timeout(tasks.ping);
+    (tasks.ping, is_ping) = check_timeout(clock, tasks.ping);
     if is_ping {
 	defmt::info!("Ping");
-	tasks.ping = schedule_timeout(10000);
+	tasks.ping = schedule_timeout(clock, 10000);
     }
     let is_led;
-    (tasks.led, is_led) = check_timeout(tasks.led);
+    (tasks.led, is_led) = check_timeout(clock, tasks.led);
     if is_led {
-	tasks.led = schedule_timeout(tasks.led_interval.into());
+	tasks.led = schedule_timeout(clock, tasks.led_interval.into());
 	tasks.led_state = !tasks.led_state;
 	board_peripherals.led.set_state(PinState::from(tasks.led_state));
     }
     let is_tx_off;
-    (tasks.tx_off, is_tx_off) = check_timeout(tasks.tx_off);
+    (tasks.tx_off, is_tx_off) = check_timeout(clock, tasks.tx_off);
     if is_tx_off {
 	board_peripherals.led.set_state(PinState::from(true));
     }
     let is_morse;
-    (tasks.morse_timer, is_morse) = check_timeout(tasks.morse_timer);
+    (tasks.morse_timer, is_morse) = check_timeout(clock, tasks.morse_timer);
     if is_morse && let Some(s) = tasks.morse_state {
 	match next_pin_state(s) {
 	    None => {

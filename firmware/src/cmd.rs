@@ -13,13 +13,14 @@ use rig_to_usb_logic::morse::LineState;
 pub fn decode_and_run(
     board_peripherals: &mut BoardPeripherals,
     mut tasks: Tasks,
-    packet: &[u8]
+    packet: &[u8],
+    clock: u64,
 ) -> Tasks
 {
     let mut decoder = minicbor::Decoder::new(&packet);
     if let Ok(cmd) = decoder.decode::<Cmd>() {
 	defmt::info!("cbor decode message: {}", cmd);
-	tasks = run_cmd(board_peripherals, tasks, cmd);
+	tasks = run_cmd(board_peripherals, tasks, cmd, clock);
     } else
     {
     defmt::info!("cbor decode error");
@@ -32,7 +33,8 @@ pub fn decode_and_run(
 pub fn run_cmd(
     board_peripherals: &mut BoardPeripherals,
     mut tasks: Tasks,
-    cmd: Cmd
+    cmd: Cmd,
+    clock: u64,
 )
     -> Tasks
 {
@@ -48,21 +50,21 @@ pub fn run_cmd(
 	    tasks.led = TIME_OUT_DISABLED;
 	}
 	LEDBlink{ interval } => {
-	    tasks.led = schedule_timeout(interval.into());
+	    tasks.led = schedule_timeout(clock, interval.into());
 	}
 	TxOn{ time } => {
 	    board_peripherals.led.set_state(PinState::from(false));
-	    tasks.tx_off = schedule_timeout(time);
+	    tasks.tx_off = schedule_timeout(clock, time);
 	}
 	MorseSpeed{ ditlen } => { tasks.morse_ditlen = ditlen }
 	MorseSend{ txt } => {
 	    tasks.morse_state = Some(LineState::init(txt));
-            tasks.morse_timer = schedule_timeout(tasks.morse_ditlen.into());
+            tasks.morse_timer = schedule_timeout(clock, tasks.morse_ditlen.into());
 	}
 	MorseAppend{ txt } => match &mut tasks.morse_state {
 	    None => {
 		tasks.morse_state = Some(LineState::init(txt));
-		tasks.morse_timer = schedule_timeout(tasks.morse_ditlen.into());
+		tasks.morse_timer = schedule_timeout(clock, tasks.morse_ditlen.into());
 	    }
 	    Some(s) => {
 		s.append(txt);
