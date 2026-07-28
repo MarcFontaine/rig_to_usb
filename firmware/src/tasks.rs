@@ -10,6 +10,17 @@ pub struct TimeOut {
     pub time: u64,
 }
 
+impl TimeOut {
+    pub fn check_timeout (&mut self, clock: u64) -> bool
+    {
+	if self.enabled && clock > self.time {
+	    self.enabled = false;
+	    return true;
+	}
+	false
+    }
+}
+
 pub const TIME_OUT_DISABLED:TimeOut = TimeOut { enabled: false, time: 0};
 
 #[derive(Debug)]
@@ -41,17 +52,6 @@ pub fn next_timeout (t: TimeOut, ms:u32) -> TimeOut
     }
 }
 
-pub fn check_timeout
-    (clock: u64,
-     t: TimeOut)
-     -> (TimeOut, bool)
-{
-    if t.enabled && clock > t.time {
-	return (TimeOut {enabled: false, time: t.time}, true);
-    }
-    (t, false)
-}
-
 pub fn init_tasks() -> Tasks
 {
     Tasks {
@@ -74,32 +74,22 @@ pub fn run_pending_tasks
     )
     -> Tasks
 {
-    let is_ping;
-    (tasks.ping, is_ping) = check_timeout(clock, tasks.ping);
-    if is_ping {
+    if tasks.ping.check_timeout(clock) {
 	defmt::info!("Ping");
 	tasks.ping = schedule_timeout(clock, 10000);
     }
-    let is_led;
-    (tasks.led, is_led) = check_timeout(clock, tasks.led);
-    if is_led {
+    if tasks.led.check_timeout(clock) {
 	tasks.led = schedule_timeout(clock, tasks.led_interval.into());
 	tasks.led_state = !tasks.led_state;
 	board_peripherals.led.led_off();
     }
-    let is_radio_off;
-    (tasks.radio_off, is_radio_off) = check_timeout(clock, tasks.radio_off);
-    if is_radio_off {
+    if tasks.radio_off.check_timeout(clock) {
 	board_peripherals.on_off.set_state(Low);
     }
-    let is_tx_off;
-    (tasks.tx_off, is_tx_off) = check_timeout(clock, tasks.tx_off);
-    if is_tx_off {
+    if tasks.tx_off.check_timeout(clock) {
 	board_peripherals.hochschalten.set_state(Low);
     }
-    let is_morse;
-    (tasks.morse_timer, is_morse) = check_timeout(clock, tasks.morse_timer);
-    if is_morse && let Some(s) = tasks.morse_state {
+    if tasks.morse_timer.check_timeout(clock) && let Some(s) = tasks.morse_state {
 	match next_pin_state(s) {
 	    None => {
 		tasks.morse_state = None;
