@@ -23,12 +23,18 @@ pub enum Cmd<'a> {
     #[n(5)]
     LEDBlink{#[n(0)] interval: u32},
     #[n(6)]
-    TxOn{#[n(0)] time: u32},
+    RadioOn{#[n(0)] time: u32},
     #[n(7)]
-    MorseSpeed{#[n(0)] ditlen: u16},
+    RadioOff,
     #[n(8)]
-    MorseSend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    TxOn{#[n(0)] time: u32},
     #[n(9)]
+    TxOff,
+    #[n(10)]
+    MorseSpeed{#[n(0)] ditlen: u16},
+    #[n(11)]
+    MorseSend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    #[n(12)]
     MorseAppend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
 }
 

@@ -1,6 +1,6 @@
 use defmt_rtt as _;
 use crate::hal::gpio::PinState;
-
+use PinState::*;
 use crate::bootloader::{jump_to_bootloader};
 use crate::init::{BoardPeripherals};
 use crate::tasks::{Tasks, schedule_timeout, TIME_OUT_DISABLED};
@@ -52,9 +52,19 @@ pub fn run_cmd(
 	LEDBlink{ interval } => {
 	    tasks.led = schedule_timeout(clock, interval.into());
 	}
+	RadioOn{ time } => {
+	    board_peripherals.on_off.set_state(High);
+	    tasks.radio_off = schedule_timeout(clock, time);
+	}
+	RadioOff => {
+	    board_peripherals.on_off.set_state(Low);
+	}
 	TxOn{ time } => {
-	    board_peripherals.led.set_state(PinState::from(false));
+	    board_peripherals.hochschalten.set_state(High);
 	    tasks.tx_off = schedule_timeout(clock, time);
+	}
+	TxOff => {
+	    board_peripherals.hochschalten.set_state(Low);
 	}
 	MorseSpeed{ ditlen } => { tasks.morse_ditlen = ditlen }
 	MorseSend{ txt } => {

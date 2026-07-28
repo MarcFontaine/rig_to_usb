@@ -27,6 +27,8 @@ static USB_BUS_ALLOCATOR: StaticCell<UsbBusAllocator<BoardUsbBus>> = StaticCell:
 pub struct BoardPeripherals {
     pub watchdog: IndependentWatchdog,
     pub led: pins::LED,
+    pub hochschalten: pins::Hochschalten,
+    pub on_off: pins::OnOff,
     pub usb_bus: &'static UsbBusAllocator<BoardUsbBus>,
 }
 
@@ -70,6 +72,8 @@ pub fn init_rcc() -> BoardPeripherals {
     BoardPeripherals {
 	watchdog: watchdog,
         led: gpioc.pc13.into_push_pull_output(&mut gpioc.crh),
+        hochschalten: gpioc.pc14.into_push_pull_output(&mut gpioc.crh),
+	on_off: gpioc.pc15.into_push_pull_output(&mut gpioc.crh),
         usb_bus: st_bus,
     }
 }

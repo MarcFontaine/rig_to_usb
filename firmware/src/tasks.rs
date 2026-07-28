@@ -1,7 +1,8 @@
 use crate::init::{BoardPeripherals, SYSTEM_CLOCK_MHZ};
 use crate::hal::gpio::PinState;
+use PinState::*;
 use rig_to_usb_logic::morse::{LineState, next_pin_state };
-use rig_to_usb_logic::morse::MorseState::*;
+use rig_to_usb_logic::morse::MorseState;
 
 #[derive(Debug)]
 pub struct TimeOut {
@@ -17,6 +18,7 @@ pub struct Tasks {
     pub led: TimeOut,
     pub led_state: bool,
     pub led_interval: u16,
+    pub radio_off: TimeOut,
     pub tx_off: TimeOut,
     pub morse_timer: TimeOut,
     pub morse_state: Option<LineState>,
@@ -57,6 +59,7 @@ pub fn init_tasks() -> Tasks
 	led: schedule_timeout(0, 1000),
 	led_state: false,
 	led_interval: 1000,
+	radio_off: TIME_OUT_DISABLED,
 	tx_off: TIME_OUT_DISABLED,
 	morse_timer: TIME_OUT_DISABLED,
         morse_state: None,
@@ -84,10 +87,15 @@ pub fn run_pending_tasks
 	tasks.led_state = !tasks.led_state;
 	board_peripherals.led.set_state(PinState::from(tasks.led_state));
     }
+    let is_radio_off;
+    (tasks.radio_off, is_radio_off) = check_timeout(clock, tasks.radio_off);
+    if is_radio_off {
+	board_peripherals.on_off.set_state(Low);
+    }
     let is_tx_off;
     (tasks.tx_off, is_tx_off) = check_timeout(clock, tasks.tx_off);
     if is_tx_off {
-	board_peripherals.led.set_state(PinState::from(true));
+	board_peripherals.hochschalten.set_state(Low);
     }
     let is_morse;
     (tasks.morse_timer, is_morse) = check_timeout(clock, tasks.morse_timer);
@@ -96,13 +104,13 @@ pub fn run_pending_tasks
 	    None => {
 		tasks.morse_state = None;
 	    }
-	    Some((High, n)) => {
-                board_peripherals.led.set_state(PinState::from(false));
+	    Some((MorseState::High, n)) => {
+                board_peripherals.hochschalten.set_state(High);
 		tasks.morse_state = Some(n);
 		tasks.morse_timer = next_timeout(tasks.morse_timer, tasks.morse_ditlen.into());
 	    }
-	    Some((Low, n)) => {
-                board_peripherals.led.set_state(PinState::from(true));
+	    Some((MorseState::Low, n)) => {
+                board_peripherals.hochschalten.set_state(Low);
 		tasks.morse_state = Some(n);
 		tasks.morse_timer = next_timeout(tasks.morse_timer, tasks.morse_ditlen.into());
 	    }
