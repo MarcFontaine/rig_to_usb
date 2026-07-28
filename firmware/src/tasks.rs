@@ -81,7 +81,7 @@ pub fn run_pending_tasks
     if tasks.led.check_timeout(clock) {
 	tasks.led = schedule_timeout(clock, tasks.led_interval.into());
 	tasks.led_state = !tasks.led_state;
-	board_peripherals.led.led_off();
+	board_peripherals.led.set(tasks.led_state);
     }
     if tasks.radio_off.check_timeout(clock) {
 	board_peripherals.on_off.set_state(Low);
