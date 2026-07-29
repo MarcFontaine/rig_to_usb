@@ -17,10 +17,10 @@ pub mod pins_we_act;
 pub use pins_we_act as pins;
 
 #[cfg(feature = "stm32f103")]
-pub mod pins_bluepill;
+pub mod pins_brehmer_board_bluepill;
 
 #[cfg(feature = "stm32f103")]
-pub use pins_bluepill as pins;
+pub use pins_brehmer_board_bluepill as pins;
 
 #[cfg(feature = "stm32g474")]
 pub mod hal {

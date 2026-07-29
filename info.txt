@@ -44,3 +44,13 @@ evcxr
 
 cargo build -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi  --release
 
+brehmer board:
+brehmer board treibt nach 5v!! alles ist invertiert!!
+rts 0v -> an
+rts 5v -> aus
+
+das ftdi board macht: rts high ->0v rts low ->5v dtr ebenso
+
+FIX : brehmer board auf 3.3V umlöten und umjumpern
+
+

@@ -69,11 +69,16 @@ pub fn init_rcc() -> BoardPeripherals {
     let raw = UsbBusHal::new(usb_peripheral);
     let st_bus = USB_BUS_ALLOCATOR.init(raw);
 
-    BoardPeripherals {
+    let mut board = BoardPeripherals {
 	watchdog: watchdog,
         led: pins::Led::new(gpioc.pc13.into_push_pull_output(&mut gpioc.crh)),
         hochschalten: gpioc.pc14.into_push_pull_output(&mut gpioc.crh),
 	on_off: gpioc.pc15.into_push_pull_output(&mut gpioc.crh),
         usb_bus: st_bus,
-    }
+    };
+    // hack for inverted breherboard !
+    // by default the pins are Low but Brehmer Board needs inverted!
+    board.on_off.set_state(PinState::High);
+    board.hochschalten.set_state(PinState::High);
+    board
 }

@@ -84,10 +84,11 @@ pub fn run_pending_tasks
 	board_peripherals.led.set(tasks.led_state);
     }
     if tasks.radio_off.check_timeout(clock) {
-	board_peripherals.on_off.set_state(Low);
+	board_peripherals.on_off.set_state(High);
+	board_peripherals.hochschalten.set_state(High);
     }
     if tasks.tx_off.check_timeout(clock) {
-	board_peripherals.hochschalten.set_state(Low);
+	board_peripherals.hochschalten.set_state(High);
     }
     if tasks.morse_timer.check_timeout(clock) && let Some(s) = tasks.morse_state {
 	match next_pin_state(s) {
@@ -95,12 +96,12 @@ pub fn run_pending_tasks
 		tasks.morse_state = None;
 	    }
 	    Some((MorseState::High, n)) => {
-                board_peripherals.hochschalten.set_state(High);
+                board_peripherals.hochschalten.set_state(Low);
 		tasks.morse_state = Some(n);
 		tasks.morse_timer = next_timeout(tasks.morse_timer, tasks.morse_ditlen.into());
 	    }
 	    Some((MorseState::Low, n)) => {
-                board_peripherals.hochschalten.set_state(Low);
+                board_peripherals.hochschalten.set_state(High);
 		tasks.morse_state = Some(n);
 		tasks.morse_timer = next_timeout(tasks.morse_timer, tasks.morse_ditlen.into());
 	    }

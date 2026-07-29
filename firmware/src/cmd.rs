@@ -53,18 +53,18 @@ pub fn run_cmd(
 	    tasks.led = schedule_timeout(clock, interval.into());
 	}
 	RadioOn{ time } => {
-	    board_peripherals.on_off.set_state(High);
+	    board_peripherals.on_off.set_state(Low);
 	    tasks.radio_off = schedule_timeout(clock, time);
 	}
 	RadioOff => {
-	    board_peripherals.on_off.set_state(Low);
+	    board_peripherals.on_off.set_state(High);
 	}
 	TxOn{ time } => {
-	    board_peripherals.hochschalten.set_state(High);
+	    board_peripherals.hochschalten.set_state(Low);
 	    tasks.tx_off = schedule_timeout(clock, time);
 	}
 	TxOff => {
-	    board_peripherals.hochschalten.set_state(Low);
+	    board_peripherals.hochschalten.set_state(High);
 	}
 	MorseSpeed{ ditlen } => { tasks.morse_ditlen = ditlen }
 	MorseSend{ txt } => {
