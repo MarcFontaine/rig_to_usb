@@ -20,10 +20,10 @@ macro_rules! error {
     ($fmt:expr $(, $arg:expr)* $(,)?) => {};
 }
 
-#[cfg(not(feature = "defmt"))]
+#[cfg(feature = "std-json")]
 extern crate std;
 
-#[cfg(not(feature = "defmt"))]
+#[cfg(feature = "std-json")]
 #[macro_export]
 macro_rules! println {
     ($($arg:tt)*) => {
@@ -31,14 +31,13 @@ macro_rules! println {
     };
 }
 
-#[cfg(feature = "defmt")]
+#[cfg(not(feature = "std-json"))]
 #[macro_export]
 macro_rules! println {
     ($($arg:tt)*) => {};
 }
 
-
-#[cfg(not(feature = "defmt"))]
+#[cfg(feature = "std-json")]
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => {
@@ -46,7 +45,7 @@ macro_rules! print {
     };
 }
 
-#[cfg(feature = "defmt")]
+#[cfg(not(feature = "std-json"))]
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => {};

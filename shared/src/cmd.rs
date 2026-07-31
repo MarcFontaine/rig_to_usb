@@ -1,4 +1,5 @@
 use minicbor::{Decode, Encode};
+#[cfg(any(feature = "std-json", feature = "defmt"))]
 use minicbor::encode::write::Cursor;
 
 #[cfg(feature = "defmt")]
@@ -38,6 +39,7 @@ pub enum Cmd<'a> {
     MorseAppend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
 }
 
+#[cfg(any(feature = "std-json", feature = "defmt"))]
 pub fn encode_test(cmd: Cmd)
 -> ()
 {

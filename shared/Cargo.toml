@@ -18,3 +18,4 @@ ringbuffer = { version = "0.16.0", default-features = false }
 [[bin]]
 name = "stdin_to_cbor"
 path = "src/stdin_to_cbor.rs"
+required-features = ["std-json"]
