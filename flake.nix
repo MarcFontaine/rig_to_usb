@@ -4,7 +4,7 @@
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "nixpkgs/nixos-26.05";
+    nixpkgs.url = "nixpkgs/master";
   };
   outputs = { self, fenix, nixpkgs }:
   let
@@ -20,6 +20,8 @@
       targets.thumbv7em-none-eabihf.latest.rust-std
       targets.thumbv7m-none-eabi.latest.rust-std
       targets.x86_64-unknown-linux-gnu.latest.rust-std
+      # targets.wasm32-unknown-unknown.latest.rust-std
+      targets.wasm32v1-none.latest.rust-std
     ];
   in
     {
@@ -39,6 +41,8 @@
         rust-analyzer
         dfu-util
         evcxr
+        # wasm-bindgen-cli_0_2_126 # for std
+        twiggy # analyse .wasm
       ];
 
       CARGO_BUILD_TARGET = "thumbv7em-none-eabihf";
