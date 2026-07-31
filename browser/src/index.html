@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Rust WASM Demo</title>
+</head>
+<body>
+  <script type="module">
+    import init, { parse } from './cmd_to_cbor.js';
+    
+    await init();
+    var ret = parse('{"morseappend":{"txt":"cd DM1MF"}}');
+    console.log(ret)
+  </script>
+</body>
+</html>

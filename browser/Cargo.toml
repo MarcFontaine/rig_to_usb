@@ -1,0 +1,18 @@
+[package]
+name = "cmd_to_cbor"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rig_to_usb_logic = { path = "../shared", default-features = false}
+minicbor = { version = "2.2", default-features = false, features = ["derive"] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

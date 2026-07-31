@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust no_std WASM</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #fff; }
+        h1 { color: #4caf50; }
+        .box { background: #2d2d2d; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
+        button { background: #e91e63; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 3px; font-weight: bold; }
+        button:hover { background: #c2185b; }
+    </style>
+</head>
+<body>
+
+    <h1>Rust <code>#![no_std]</code> WASM Test</h1>
+    
+    <div class="box">
+        <h3>Status:</h3>
+        <div id="status">WASM wird geladen...</div>
+    </div>
+
+    <div class="box">
+        <h3>Panic Test:</h3>
+        <p>Klicke auf den Button, um im WASM-Code absichtlich einen Panic auszulösen. Öffne vorher die <strong>Entwickler-Konsole (F12)</strong>!</p>
+        <button id="panicBtn" disabled>WASM Panic auslösen</button>
+    </div>
+
+    <script>
+        // Diese Variable hält später die Referenz auf die WASM-Instanz
+        let wasmInstance;
+
+        // 1. Definition der Imports, die Rust vom Browser erwartet
+        const importObject = {
+            env: {
+                host_panic: function(ptr, len) {
+                    // Hole den Speicher der WASM-Instanz
+                    const memoryBuffer = wasmInstance.exports.memory.buffer;
+                    
+                    // Dekodiere die UTF-8 Bytes der Fehlermeldung
+                    const utf8Decoder = new TextDecoder("utf-8");
+                    const bytes = new Uint8Array(memoryBuffer, ptr, len);
+                    const errorMessage = utf8Decoder.decode(bytes);
+                    
+                    // Ausgabe in der Browser-Konsole
+                    console.error("🚨 CRITICAL WASM PANIC:", errorMessage);
+                    
+                    // Visuelles Feedback auf der Seite
+                    document.getElementById("status").innerHTML = 
+                        `<span style="color: #ff5252;">Abgestürzt! Fehler: "${errorMessage}" (Siehe Konsole)</span>`;
+                }
+            }
+        };
+
+        // 2. WASM-Datei laden und instanziieren
+        // Pfad zur kompilierten .wasm-Datei (muss im selben Ordner liegen)
+        const wasmFile = "cmd_to_cbor.wasm"; 
+	
+        WebAssembly.instantiateStreaming(fetch(wasmFile), importObject)
+        .then(result => {
+        // Instanz global speichern, damit host_panic darauf zugreifen kann
+        wasmInstance = result.instance;
+        
+        // UI aktualisieren
+        document.getElementById("status").innerText = "Bereit. WASM erfolgreich geladen.";
+        const btn = document.getElementById("panicBtn");
+        btn.disabled = false;
+	
+        // Event-Listener für den Panic-Button hinzufügen
+        btn.addEventListener("click", () => {
+        try {
+        console.log("startbootloader im WASM-Modul");
+        var res = wasmInstance.exports.led_blink(1000);
+        console.log("res",res);
+        console.log("Rufe trigger_panic() im WASM-Modul auf...");
+        wasmInstance.exports.trigger_panic();
+        } catch (err) {
+        // Der Fehler "RuntimeError: unreachable" wird hier abgefangen,
+        // damit das JavaScript auf der restlichen Seite normal weiterläuft.
+        console.log("WASM-Ausführung nach Panic wie erwartet gestoppt.");
+        }
+        });
+        })
+        .catch(error => {
+        console.error("Fehler beim Laden des WASM-Moduls:", error);
+        document.getElementById("status").innerText = "Fehler beim Laden: " + error.message;
+        });
+    </script>
+</body>
+</html>
