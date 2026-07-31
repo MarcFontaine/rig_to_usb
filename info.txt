@@ -54,3 +54,6 @@ das ftdi board macht: rts high ->0v rts low ->5v dtr ebenso
 FIX : brehmer board auf 3.3V umlöten und umjumpern
 
 
+
+wasm:
+cargo build -p cmd_to_cbor --target wasm32v1-none --profile release-mini

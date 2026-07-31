@@ -43,6 +43,7 @@
         evcxr
         # wasm-bindgen-cli_0_2_126 # for std
         twiggy # analyse .wasm
+        wabt # webassembly tools wasm-strip target/wasm32-unknown-unknown/release/dein_projekt.wasm
       ];
 
       CARGO_BUILD_TARGET = "thumbv7em-none-eabihf";
