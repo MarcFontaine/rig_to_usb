@@ -34,9 +34,9 @@ pub enum Cmd<'a> {
     #[n(10)]
     MorseSpeed{#[n(0)] ditlen: u16},
     #[n(11)]
-    MorseSend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    MorseSend{ #[cbor(n(0), with = "minicbor::bytes")] txt: &'a [u8]},
     #[n(12)]
-    MorseAppend{ #[cbor(n(1), with = "minicbor::bytes")] txt: &'a [u8]},
+    MorseAppend{ #[cbor(n(0), with = "minicbor::bytes")] txt: &'a [u8]},
 }
 
 #[cfg(any(feature = "std-json", feature = "defmt"))]
