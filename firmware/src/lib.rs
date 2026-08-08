@@ -10,6 +10,7 @@ pub mod main_loop;
 pub mod test;
 pub mod tasks;
 pub mod board;
+pub mod uart_tx;
 
 #[cfg(feature = "stm32g474")]
 pub mod pins_we_act;

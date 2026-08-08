@@ -19,7 +19,8 @@ use stm32f1xx_hal::dma::DmaExt;
 
 use static_cell::StaticCell;
 
-use crate::board::{Board,TxState};
+use crate::board::{Board};
+use crate::uart_tx;
 
 pub const SYSTEM_CLOCK_MHZ: u32 = 72;
 
@@ -88,7 +89,7 @@ pub fn init_rcc() ->
         led: gpioc.pc13.into_push_pull_output(&mut gpioc.crh),
         hochschalten: gpioc.pc14.into_push_pull_output(&mut gpioc.crh),
 	on_off: gpioc.pc15.into_push_pull_output(&mut gpioc.crh),
-	cat_tx: TxState::Ready(tx_channel.with_dma(dma.4))
+	cat_tx: uart_tx::init_tx(tx_channel.with_dma(dma.4))
     };
     board.radio_off();
     board.tx_off();
