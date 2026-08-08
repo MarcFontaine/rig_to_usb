@@ -26,8 +26,7 @@
   in
     {
     test = fenix.packages.x86_64-linux;
-    inherit pkgs;  
-    packages.x86_64-linux.default = fenix.packages.x86_64-linux.minimal.toolchain;
+    inherit pkgs;
     devShells.x86_64-linux.default = pkgs.mkShell {
       name = "rust-devshell";
 
@@ -59,6 +58,30 @@
         echo "Rust DevShell aktiv!"
         echo "Rust-Version: $(rustc --version)"
       '';
+    };
+    packages.x86_64-linux.default = pkgs.rustPlatform.buildRustPackage rec {
+      pname = "rig_to_usb";
+      version = "0.0.0";
+      src = ./.;
+
+      cargoLock = {
+        lockFile = ./Cargo.lock;
+        outputHashes = {
+        };
+      };
+      cargoBuildFlags = [
+        "--bin" "stdin_to_cbor"
+        "--features" "std-json"
+        "--target" pkgs.stdenv.hostPlatform.config
+      ];
+      cargoTestFlags = [
+        "--bin" "stdin_to_cbor"
+        "--features" "std-json"
+        "--target" pkgs.stdenv.hostPlatform.config
+      ];
+      nativeBuildInputs = [ pkgs.pkg-config ];
+      buildInputs = [
+      ];
     };
   };
 }

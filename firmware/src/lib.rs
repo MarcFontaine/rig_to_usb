@@ -9,18 +9,13 @@ pub mod poll_usb;
 pub mod main_loop;
 pub mod test;
 pub mod tasks;
+pub mod board;
 
 #[cfg(feature = "stm32g474")]
 pub mod pins_we_act;
 
 #[cfg(feature = "stm32g474")]
 pub use pins_we_act as pins;
-
-#[cfg(feature = "stm32f103")]
-pub mod pins_brehmer_board_bluepill;
-
-#[cfg(feature = "stm32f103")]
-pub use pins_brehmer_board_bluepill as pins;
 
 #[cfg(feature = "stm32g474")]
 pub mod hal {
@@ -49,4 +44,5 @@ pub mod hal {
     pub use stm32f1xx_hal::rcc;
     pub use stm32f1xx_hal::pac;
     pub use stm32f1xx_hal::gpio::{ GpioExt, Pin, Output, PushPull};
+    pub use stm32f1xx_hal::watchdog::IndependentWatchdog;
 }

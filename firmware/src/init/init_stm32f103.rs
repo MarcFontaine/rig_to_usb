@@ -16,7 +16,7 @@ use stm32f1xx_hal::watchdog::IndependentWatchdog;
 
 use static_cell::StaticCell;
 
-use crate::pins;
+use crate::board::Board;
 
 pub const SYSTEM_CLOCK_MHZ: u32 = 72;
 
@@ -24,15 +24,13 @@ pub type BoardUsbBus = UsbBusHal<Peripheral>;
 
 static USB_BUS_ALLOCATOR: StaticCell<UsbBusAllocator<BoardUsbBus>> = StaticCell::new();
 
-pub struct BoardPeripherals {
-    pub watchdog: IndependentWatchdog,
-    pub led: pins::Led,
-    pub hochschalten: pins::Hochschalten,
-    pub on_off: pins::OnOff,
-    pub usb_bus: &'static UsbBusAllocator<BoardUsbBus>,
-}
-
-pub fn init_rcc() -> BoardPeripherals {
+pub fn init_rcc() ->
+    (
+	IndependentWatchdog,
+	&'static UsbBusAllocator<BoardUsbBus>,
+	Board
+    )
+{
     let mut cp = cortex_m::Peripherals::take().unwrap();
     cp.DCB.enable_trace();
     cp.DWT.enable_cycle_counter();
@@ -69,16 +67,15 @@ pub fn init_rcc() -> BoardPeripherals {
     let raw = UsbBusHal::new(usb_peripheral);
     let st_bus = USB_BUS_ALLOCATOR.init(raw);
 
-    let mut board = BoardPeripherals {
-	watchdog: watchdog,
-        led: pins::Led::new(gpioc.pc13.into_push_pull_output(&mut gpioc.crh)),
+    let mut board = Board {
+        led: gpioc.pc13.into_push_pull_output(&mut gpioc.crh),
         hochschalten: gpioc.pc14.into_push_pull_output(&mut gpioc.crh),
 	on_off: gpioc.pc15.into_push_pull_output(&mut gpioc.crh),
-        usb_bus: st_bus,
     };
-    // hack for inverted breherboard !
-    // by default the pins are Low but Brehmer Board needs inverted!
-    board.on_off.set_state(PinState::High);
-    board.hochschalten.set_state(PinState::High);
-    board
+    board.radio_off();
+    board.tx_off();
+    (watchdog,
+     st_bus,
+     board
+    )
 }

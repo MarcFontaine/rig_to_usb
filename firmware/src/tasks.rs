@@ -1,6 +1,5 @@
-use crate::init::{BoardPeripherals, SYSTEM_CLOCK_MHZ};
-use crate::hal::gpio::PinState;
-use PinState::*;
+use crate::board::Board;
+use crate::init::{SYSTEM_CLOCK_MHZ};
 use rig_to_usb_logic::morse::{LineState, next_pin_state };
 use rig_to_usb_logic::morse::MorseState;
 
@@ -68,7 +67,7 @@ pub fn init_tasks() -> Tasks
 }
 
 pub fn run_pending_tasks
-    (board_peripherals: &mut BoardPeripherals,
+    (board: &mut Board,
      mut tasks: Tasks,
      clock: u64
     )
@@ -81,14 +80,14 @@ pub fn run_pending_tasks
     if tasks.led.check_timeout(clock) {
 	tasks.led = schedule_timeout(clock, tasks.led_interval.into());
 	tasks.led_state = !tasks.led_state;
-	board_peripherals.led.set(tasks.led_state);
+	board.led_set(tasks.led_state);
     }
     if tasks.radio_off.check_timeout(clock) {
-	board_peripherals.on_off.set_state(High);
-	board_peripherals.hochschalten.set_state(High);
+	board.tx_off();
+	board.radio_off();
     }
     if tasks.tx_off.check_timeout(clock) {
-	board_peripherals.hochschalten.set_state(High);
+	board.tx_off();
     }
     if tasks.morse_timer.check_timeout(clock) && let Some(s) = tasks.morse_state {
 	match next_pin_state(s) {
@@ -96,12 +95,12 @@ pub fn run_pending_tasks
 		tasks.morse_state = None;
 	    }
 	    Some((MorseState::High, n)) => {
-                board_peripherals.hochschalten.set_state(Low);
+                board.tx_on();
 		tasks.morse_state = Some(n);
 		tasks.morse_timer = next_timeout(tasks.morse_timer, tasks.morse_ditlen.into());
 	    }
 	    Some((MorseState::Low, n)) => {
-                board_peripherals.hochschalten.set_state(High);
+                board.tx_off();
 		tasks.morse_state = Some(n);
 		tasks.morse_timer = next_timeout(tasks.morse_timer, tasks.morse_ditlen.into());
 	    }

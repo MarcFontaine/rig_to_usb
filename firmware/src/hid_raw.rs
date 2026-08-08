@@ -18,8 +18,8 @@ fn main() -> ! {
     set_jump_to_bootloader_flag();
     defmt::info!("Hello, USB-World!");
 
-    let mut board_peripherals = init_rcc();
-    let mut my_usb = init_usb(board_peripherals.usb_bus);
+    let (watchdog, usb_bus, mut board) = init_rcc();
+    let mut my_usb = init_usb(usb_bus);
 
-    main_loop(&mut board_peripherals, &mut my_usb);
+    main_loop(watchdog, &mut my_usb, &mut board,);
 }

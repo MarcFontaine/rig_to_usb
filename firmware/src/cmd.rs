@@ -1,8 +1,6 @@
 use defmt_rtt as _;
-use crate::hal::gpio::PinState;
-use PinState::*;
 use crate::bootloader::{jump_to_bootloader};
-use crate::init::{BoardPeripherals};
+use crate::board::Board;
 use crate::tasks::{Tasks, schedule_timeout, TIME_OUT_DISABLED};
 use cortex_m::peripheral::SCB;
 
@@ -11,7 +9,7 @@ use rig_to_usb_logic::cmd::Cmd::*;
 use rig_to_usb_logic::morse::LineState;
 
 pub fn decode_and_run(
-    board_peripherals: &mut BoardPeripherals,
+    board: &mut Board,
     mut tasks: Tasks,
     packet: &[u8],
     clock: u64,
@@ -20,7 +18,7 @@ pub fn decode_and_run(
     let mut decoder = minicbor::Decoder::new(&packet);
     if let Ok(cmd) = decoder.decode::<Cmd>() {
 	defmt::info!("cbor decode message: {}", cmd);
-	tasks = run_cmd(board_peripherals, tasks, cmd, clock);
+	tasks = run_cmd(board, tasks, cmd, clock);
     } else
     {
     defmt::info!("cbor decode error");
@@ -31,7 +29,7 @@ pub fn decode_and_run(
 }
 
 pub fn run_cmd(
-    board_peripherals: &mut BoardPeripherals,
+    board: &mut Board,
     mut tasks: Tasks,
     cmd: Cmd,
     clock: u64,
@@ -46,25 +44,25 @@ pub fn run_cmd(
 	}
 	StartBootLoader => { jump_to_bootloader(); }
 	LED{ value } => {
-	    board_peripherals.led.set(value);
+	    board.led_set(value);
 	    tasks.led = TIME_OUT_DISABLED;
 	}
 	LEDBlink{ interval } => {
 	    tasks.led = schedule_timeout(clock, interval.into());
 	}
 	RadioOn{ time } => {
-	    board_peripherals.on_off.set_state(Low);
+	    board.radio_on();
 	    tasks.radio_off = schedule_timeout(clock, time);
 	}
 	RadioOff => {
-	    board_peripherals.on_off.set_state(High);
+	    board.radio_off();
 	}
 	TxOn{ time } => {
-	    board_peripherals.hochschalten.set_state(Low);
+	    board.tx_on();
 	    tasks.tx_off = schedule_timeout(clock, time);
 	}
 	TxOff => {
-	    board_peripherals.hochschalten.set_state(High);
+	    board.tx_off();
 	}
 	MorseSpeed{ ditlen } => { tasks.morse_ditlen = ditlen }
 	MorseSend{ txt } => {
