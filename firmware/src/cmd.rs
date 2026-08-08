@@ -48,6 +48,7 @@ pub fn run_cmd(
 	    tasks.led = TIME_OUT_DISABLED;
 	}
 	LEDBlink{ interval } => {
+	    tasks.led_interval = interval;
 	    tasks.led = schedule_timeout(clock, interval.into());
 	}
 	RadioOn{ time } => {
@@ -77,6 +78,9 @@ pub fn run_cmd(
 	    Some(s) => {
 		s.append(txt);
 	    }
+	}
+	SendCat{ bytes } => {
+	    board.send_cat(bytes);
 	}
     }
     tasks

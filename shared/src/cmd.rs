@@ -22,7 +22,7 @@ pub enum Cmd<'a> {
     #[n(4)]
     LED{#[n(0)] value: bool},
     #[n(5)]
-    LEDBlink{#[n(0)] interval: u32},
+    LEDBlink{#[n(0)] interval: u16},
     #[n(6)]
     RadioOn{#[n(0)] time: u32},
     #[n(7)]
@@ -37,6 +37,8 @@ pub enum Cmd<'a> {
     MorseSend{ #[cbor(n(0), with = "minicbor::bytes")] txt: &'a [u8]},
     #[n(12)]
     MorseAppend{ #[cbor(n(0), with = "minicbor::bytes")] txt: &'a [u8]},
+    #[n(13)]
+    SendCat{ #[cbor(n(0), with = "minicbor::bytes")] bytes: &'a [u8]},
 }
 
 #[cfg(any(feature = "std-json", feature = "defmt"))]

@@ -14,9 +14,12 @@ use stm32f1xx_hal::prelude::_fugit_ExtU32;
 use stm32f1xx_hal::flash::FlashExt;
 use stm32f1xx_hal::watchdog::IndependentWatchdog;
 
+use crate::hal;
+use stm32f1xx_hal::dma::DmaExt;
+
 use static_cell::StaticCell;
 
-use crate::board::Board;
+use crate::board::{Board,TxState};
 
 pub const SYSTEM_CLOCK_MHZ: u32 = 72;
 
@@ -44,13 +47,13 @@ pub fn init_rcc() ->
     watchdog.start(10000_u32.millis());
 
     let mut flash = dp.FLASH.constrain();
-    let mut rcc = dp.RCC.freeze(
+    let mut clocks = dp.RCC.freeze(
         rcc::Config::hse(8.MHz()).sysclk(SYSTEM_CLOCK_MHZ.MHz()).pclk1(36.MHz()),
         &mut flash.acr,
     );
 
-    let mut gpioa = dp.GPIOA.split(&mut rcc);
-    let mut gpioc = dp.GPIOC.split(&mut rcc);
+    let mut gpioa = dp.GPIOA.split(&mut clocks);
+    let mut gpioc = dp.GPIOC.split(&mut clocks);
 
     gpioa.pa12.as_push_pull_output_with_state(
 	&mut gpioa.crh,
@@ -67,10 +70,25 @@ pub fn init_rcc() ->
     let raw = UsbBusHal::new(usb_peripheral);
     let st_bus = USB_BUS_ALLOCATOR.init(raw);
 
+    let tx = gpioa.pa9.into_alternate_push_pull(&mut gpioa.crh);
+    let rx = gpioa.pa10;
+
+    let serial = hal::serial::Serial::new(
+        dp.USART1,
+        (tx, rx),
+        hal::serial::Config::default().baudrate(hal::time::Bps(9600)),
+        &mut clocks,
+    );
+
+    let (tx_channel, _rx_channel) = serial.split();
+
+    let dma = dp.DMA1.split(&mut clocks);
+
     let mut board = Board {
         led: gpioc.pc13.into_push_pull_output(&mut gpioc.crh),
         hochschalten: gpioc.pc14.into_push_pull_output(&mut gpioc.crh),
 	on_off: gpioc.pc15.into_push_pull_output(&mut gpioc.crh),
+	cat_tx: TxState::Ready(tx_channel.with_dma(dma.4))
     };
     board.radio_off();
     board.tx_off();

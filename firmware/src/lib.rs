@@ -45,4 +45,7 @@ pub mod hal {
     pub use stm32f1xx_hal::pac;
     pub use stm32f1xx_hal::gpio::{ GpioExt, Pin, Output, PushPull};
     pub use stm32f1xx_hal::watchdog::IndependentWatchdog;
+    pub use stm32f1xx_hal::serial;
+    pub use stm32f1xx_hal::time;
+    pub use stm32f1xx_hal::dma;
 }
