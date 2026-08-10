@@ -21,6 +21,7 @@ use static_cell::StaticCell;
 
 use crate::board::{Board};
 use crate::uart_tx;
+use crate::uart_iterator;
 
 pub const SYSTEM_CLOCK_MHZ: u32 = 72;
 
@@ -77,11 +78,15 @@ pub fn init_rcc() ->
     let serial = hal::serial::Serial::new(
         dp.USART1,
         (tx, rx),
-        hal::serial::Config::default().baudrate(hal::time::Bps(9600)),
+        hal::serial::Config::default()
+	    .baudrate(hal::time::Bps(9600))
+            .wordlength_8bits()
+            .parity_even()
+            .stopbits(hal::serial::StopBits::STOP1),
         &mut clocks,
     );
 
-    let (tx_channel, _rx_channel) = serial.split();
+    let (tx_channel, rx_channel) = serial.split();
 
     let dma = dp.DMA1.split(&mut clocks);
 
@@ -89,7 +94,8 @@ pub fn init_rcc() ->
         led: gpioc.pc13.into_push_pull_output(&mut gpioc.crh),
         hochschalten: gpioc.pc14.into_push_pull_output(&mut gpioc.crh),
 	on_off: gpioc.pc15.into_push_pull_output(&mut gpioc.crh),
-	cat_tx: uart_tx::init_tx(tx_channel.with_dma(dma.4))
+	cat_tx: uart_tx::init_tx(tx_channel.with_dma(dma.4)),
+	cat_rx: uart_iterator::PollingReceiver::new(rx_channel, dma.5),
     };
     board.radio_off();
     board.tx_off();

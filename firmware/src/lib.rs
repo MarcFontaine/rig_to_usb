@@ -11,6 +11,7 @@ pub mod test;
 pub mod tasks;
 pub mod board;
 pub mod uart_tx;
+pub mod uart_iterator;
 
 #[cfg(feature = "stm32g474")]
 pub mod pins_we_act;

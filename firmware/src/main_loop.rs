@@ -7,6 +7,7 @@ use crate::usb::{MyUsb};
 use crate::poll_usb::{poll_usb};
 use crate::tasks::{init_tasks, run_pending_tasks};
 use crate::hal::IndependentWatchdog;
+use crate::uart_iterator;
 
 pub fn main_loop<'a, B: UsbBus>
     (mut watchdog: IndependentWatchdog,
@@ -25,5 +26,6 @@ pub fn main_loop<'a, B: UsbBus>
 	watchdog.feed();
 	tasks = poll_usb(board, usb, tasks, clock);
 	tasks = run_pending_tasks(board, tasks, clock);
+	uart_iterator::poll_trx(board);
     }
 }

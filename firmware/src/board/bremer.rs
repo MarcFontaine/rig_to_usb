@@ -5,6 +5,7 @@ use gpio::PinState;
 use gpio::PinState::*;
 
 use crate::uart_tx;
+use crate::uart_iterator;
 
 pub type LedPin = Pin<'C',13, Output<PushPull>>;
 pub type Hochschalten = Pin<'C',14, Output<PushPull>>;
@@ -14,7 +15,8 @@ pub struct Board {
     pub led: LedPin,
     pub hochschalten: Hochschalten,
     pub on_off: OnOff,
-    pub cat_tx: uart_tx::TxState
+    pub cat_tx: uart_tx::TxState,
+    pub cat_rx: uart_iterator::PollingReceiver,
 }
 
 impl Board {
