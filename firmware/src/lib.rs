@@ -6,6 +6,7 @@ pub mod cmd;
 pub mod init;
 pub mod usb;
 pub mod poll_usb;
+pub mod hid_push;
 pub mod main_loop;
 pub mod test;
 pub mod tasks;

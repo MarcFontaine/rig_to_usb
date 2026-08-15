@@ -62,6 +62,7 @@ pub fn init_rcc() ->
 	PinState::Low,
         |_pin| { delay( 50*1000*SYSTEM_CLOCK_MHZ ) }
     );
+// todo: see if st_bus.force_reenumeration() works
 
     let usb_peripheral = Peripheral {
         usb: dp.USB,

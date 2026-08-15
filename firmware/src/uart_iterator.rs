@@ -5,6 +5,7 @@ use stm32f1xx_hal::{
 };
 use stm32f1xx_hal::dma::CircReadDma;
 use crate::board::{Board};
+use crate::tasks::{Tasks};
 
 const RX_BUFFER_LEN: usize = 50;
 static RX_BUFFER_CELL: StaticCell<[u8; RX_BUFFER_LEN]> = StaticCell::new();
@@ -65,9 +66,13 @@ impl Iterator for PollingReceiver {
     }
 }
 
-pub fn poll_trx (b: &mut Board)
+pub fn poll_trx
+     (b: &mut Board, mut tasks: Tasks)
+  -> Tasks
 {
   while let Some(byte) = b.cat_rx.next() {
       defmt::info!("Byte empfangen: {:a}", byte & 0x7F );
+      tasks.rx_cat_char = Some(byte & 0x7F );
   }
+  tasks
 }

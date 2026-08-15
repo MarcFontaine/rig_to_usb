@@ -4,7 +4,8 @@ use usb_device::class_prelude::UsbBus;
 
 use crate::board::Board;
 use crate::usb::{MyUsb};
-use crate::poll_usb::{poll_usb};
+use crate::poll_usb;
+use crate::hid_push;
 use crate::tasks::{init_tasks, run_pending_tasks};
 use crate::hal::IndependentWatchdog;
 use crate::uart_iterator;
@@ -24,8 +25,9 @@ pub fn main_loop<'a, B: UsbBus>
 	clock += (clk.wrapping_sub(old_clk)) as u64;
 	old_clk = clk;
 	watchdog.feed();
-	tasks = poll_usb(board, usb, tasks, clock);
+	tasks = poll_usb::poll_usb(board, usb, tasks, clock);
 	tasks = run_pending_tasks(board, tasks, clock);
-	uart_iterator::poll_trx(board);
+	tasks = uart_iterator::poll_trx(board, tasks);
+	tasks = hid_push::hid_push(usb,tasks);
     }
 }
