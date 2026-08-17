@@ -3,8 +3,11 @@ use ringbuffer::{ConstGenericRingBuffer, RingBuffer};
 use crate::board::Board;
 
 const MAX_LINE_LEN: usize = 32;
-const LF: u8 = 10;
-const CR: u8 = 13;
+
+//const LF: u8 = 10;
+//const CR: u8 = 13;
+const LF: u8 = '(' as u8;
+const CR: u8 = ')' as u8;
 
 type Buffer = ConstGenericRingBuffer::<u8, MAX_LINE_LEN>;
 
@@ -90,19 +93,29 @@ pub fn init_line_state() -> LineState
     }
 }
 
-pub fn update_xk852_line(b: &mut Board, ls: LineState) {
-    let mut msg = ls.msg;
-    let mut discarded = ls.discarded;
-    let mut l = ls.l;
+pub fn update_xk852_line(b: &mut Board, ls: &mut LineState)
+{
     while let Some(byte) = b.cat_rx.next() {
 	let chr = byte & 0x7F;
-	defmt::info!("Byte empfangen: {:a}", chr);
-        let res = add_char(&mut msg, &mut discarded, &mut l, chr);
+	defmt::info!("Byte received: {:a}", chr);
+        let res = add_char(&mut ls.msg, &mut ls.discarded, &mut ls.l, chr);
 	match res {
-	    MissingLF => {},
-	    MultipleLF => {},
+	    MissingLF => {
+		let mut buf=Buffer::new();
+		buf.extend(ls.discarded.drain());
+		ls.errors = Some(buf);
+	    },
+	    MultipleLF => {
+		let mut buf=Buffer::new();
+		buf.extend(ls.discarded.drain());
+		ls.errors = Some(buf);
+	    },
 	    Cont => {},
-	    FullLine => {},
+	    FullLine => {
+		let mut buf=Buffer::new();
+		buf.extend(ls.msg.drain());
+		ls.fullmsg = Some(buf);
+	    },
 	}
     }
 }

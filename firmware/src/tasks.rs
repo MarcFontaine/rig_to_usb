@@ -35,7 +35,6 @@ pub struct Tasks {
     pub morse_timer: TimeOut,
     pub morse_state: Option<LineState>,
     pub morse_ditlen: u16,
-    pub rx_cat_char: Option<u8>,
     pub xk852line: xk852line::LineState,
 }
 
@@ -67,7 +66,6 @@ pub fn init_tasks() -> Tasks
 	morse_timer: TIME_OUT_DISABLED,
         morse_state: None,
 	morse_ditlen: 60, // 60ms -> 20WPM
-        rx_cat_char: None,
 	xk852line: xk852line::init_line_state(),
     }
 }

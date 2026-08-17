@@ -8,7 +8,7 @@ use crate::poll_usb;
 use crate::hid_push;
 use crate::tasks::{init_tasks, run_pending_tasks};
 use crate::hal::IndependentWatchdog;
-use crate::uart_iterator;
+use crate::xk852line;
 
 pub fn main_loop<'a, B: UsbBus>
     (mut watchdog: IndependentWatchdog,
@@ -27,7 +27,7 @@ pub fn main_loop<'a, B: UsbBus>
 	watchdog.feed();
 	tasks = poll_usb::poll_usb(board, usb, tasks, clock);
 	tasks = run_pending_tasks(board, tasks, clock);
-	tasks = uart_iterator::poll_trx(board, tasks);
-	tasks = hid_push::hid_push(usb,tasks);
+	xk852line::update_xk852_line(board, &mut tasks.xk852line);
+	hid_push::hid_push(usb, &mut tasks.xk852line);
     }
 }
