@@ -13,6 +13,7 @@ pub mod tasks;
 pub mod board;
 pub mod uart_tx;
 pub mod uart_iterator;
+pub mod xk852line;
 
 #[cfg(feature = "stm32g474")]
 pub mod pins_we_act;

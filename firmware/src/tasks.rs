@@ -1,7 +1,9 @@
-use crate::board::Board;
-use crate::init::{SYSTEM_CLOCK_MHZ};
 use rig_to_usb_logic::morse::{LineState, next_pin_state };
 use rig_to_usb_logic::morse::MorseState;
+
+use crate::board::Board;
+use crate::init::{SYSTEM_CLOCK_MHZ};
+use crate::xk852line;
 
 #[derive(Debug)]
 pub struct TimeOut {
@@ -34,6 +36,7 @@ pub struct Tasks {
     pub morse_state: Option<LineState>,
     pub morse_ditlen: u16,
     pub rx_cat_char: Option<u8>,
+    pub xk852line: xk852line::LineState,
 }
 
 pub fn schedule_timeout (clock:u64, ms:u32) -> TimeOut
@@ -65,6 +68,7 @@ pub fn init_tasks() -> Tasks
         morse_state: None,
 	morse_ditlen: 60, // 60ms -> 20WPM
         rx_cat_char: None,
+	xk852line: xk852line::init_line_state(),
     }
 }
 

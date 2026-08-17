@@ -86,19 +86,19 @@ pub fn decode_test
 
 pub fn cbor_message_test() {
     info!("--- CBOR Test ---" );
-    println!("--- CBOR Test ---" );    
+    println!("--- CBOR Test ---" );
 
     let mut tx_buffer1 = [0u8; 64];
     let mut cursor1 = Cursor::new(&mut tx_buffer1[..]);
     let msg_success = Test;
     info!("1. Teste: {:?}", msg_success);
-    println!("1. Teste: {:?}", msg_success);    
+    println!("1. Teste: {:?}", msg_success);
     if let Ok(_encoded_s) = minicbor::encode(&msg_success, &mut cursor1) {
         let bytes_written = cursor1.position();
 
         if let Ok(decoded) = minicbor::decode::<Cmd>(encoded_slice) {
             info!("   -> Dekodiert erfolgreich: {:?}", decoded);
-            println!("   -> Dekodiert erfolgreich: {:?}", decoded);	    
+            println!("   -> Dekodiert erfolgreich: {:?}", decoded);
         } else {
             error!("   -> Dekodierung fehlgeschlagen!");
             println!("   -> Dekodierung fehlgeschlagen!");
