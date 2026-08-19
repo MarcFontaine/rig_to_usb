@@ -13,6 +13,7 @@ use crate::xk852line;
             data = input
     }
 )]
+
 pub struct RawReport {
     pub data: [u8; 32],
 }
@@ -21,7 +22,7 @@ pub fn hid_push<'a, B: UsbBus>
     (my_usb : &mut MyUsb<'a , B>,
     ls: &mut xk852line::LineState)
 {
-    if let Some(ref msg) = ls.fullmsg {
+    if let xk852line::LineState::ParseResult{msg, prefix: _} = ls {
 	let mut packet = RawReport {
 	    data: [0u8; 32],
 	};
@@ -41,5 +42,5 @@ pub fn hid_push<'a, B: UsbBus>
             }
 	}
     }
-    ls.fullmsg = None;
+//    ls.fullmsg = None;
 }

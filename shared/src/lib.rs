@@ -51,6 +51,7 @@ macro_rules! print {
     ($($arg:tt)*) => {};
 }
 
+pub mod hid_report;
 pub mod cmd;
 pub mod morse;
 pub mod test;

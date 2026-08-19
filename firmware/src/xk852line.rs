@@ -13,109 +13,88 @@ type Buffer = ConstGenericRingBuffer::<u8, MAX_LINE_LEN>;
 
 #[derive(Debug)]
 pub enum Line {
-    Starting,
     NoLF,
     LFSeen,
 }
 use Line::*;
 
-#[derive(Debug)]
-pub enum ParseResult {
-    MissingLF,
-    MultipleLF,
-    Cont,
-    FullLine,
-}
-use ParseResult::*;
-
-fn add_char(msg: &mut Buffer, discarded: &mut Buffer, l: &mut Line, chr: u8) -> ParseResult
+fn add_char(msg: &mut Buffer, discarded: &mut Buffer, l: &mut Line, chr: u8) -> Option<Line>
 {
-    match l {
-	Starting => if chr == LF
-	{
-	    msg.enqueue(chr);
-	    *l = LFSeen;
-	    return Cont;
-	}
-        else
-	{
-	    discarded.enqueue(chr);
-	    return Cont;
-	}
+    match *l {
 	NoLF => if chr == LF
 	{
 	    msg.enqueue(chr);
-	    *l = LFSeen;
-	    return Cont;
+	    return Some(LFSeen);
 	}
         else
 	{
 	    discarded.enqueue(chr);
-	    return MissingLF;
+	    return Some(NoLF);
 	}
 	LFSeen => match chr {
 	    LF => {
 		discarded.extend(msg.drain());
 		msg.enqueue(chr);
-		return MultipleLF;
+		return Some(LFSeen);
 	    }
 	    CR => {
                 msg.enqueue(chr);
-		*l = NoLF;
-		return FullLine;
+		return None;
 	    }
 	    other => {
 		msg.enqueue(other);
-		return Cont;
+		return Some(LFSeen);
 	    }
 	}
     }
 }
 
 #[derive(Debug)]
-pub struct LineState {
-    l: Line,
-    msg: Buffer,
-    discarded: Buffer,
-    pub errors: Option<Buffer>,
-    pub fullmsg: Option<Buffer>,
+pub enum LineState {
+    Scanning {
+	l: Line,
+	msg: Buffer,
+	prefix: Buffer,
+    },
+    ParseResult {
+	prefix: Buffer,
+	msg: Buffer,
+    }
 }
-
+use LineState::*;
 
 pub fn init_line_state() -> LineState
 {
-    LineState {
-	l:     Starting,
+    Scanning {
+	l:     NoLF,
+	prefix: Buffer::new(),
 	msg: Buffer::new(),
-	discarded: Buffer::new(),
-	errors: None,
-	fullmsg: None,
     }
 }
 
 pub fn update_xk852_line(b: &mut Board, ls: &mut LineState)
 {
-    while let Some(byte) = b.cat_rx.next() {
-	let chr = byte & 0x7F;
-	defmt::info!("Byte received: {:a}", chr);
-        let res = add_char(&mut ls.msg, &mut ls.discarded, &mut ls.l, chr);
-	match res {
-	    MissingLF => {
-		let mut buf=Buffer::new();
-		buf.extend(ls.discarded.drain());
-		ls.errors = Some(buf);
-	    },
-	    MultipleLF => {
-		let mut buf=Buffer::new();
-		buf.extend(ls.discarded.drain());
-		ls.errors = Some(buf);
-	    },
-	    Cont => {},
-	    FullLine => {
-		let mut buf=Buffer::new();
-		buf.extend(ls.msg.drain());
-		ls.fullmsg = Some(buf);
-	    },
+    if let Scanning { l, prefix, msg } = ls {
+	while let Some(byte) = b.cat_rx.next() {
+	    let chr = byte & 0x7F;
+	    defmt::info!("Byte received: {:a}", chr);
+            let res = add_char(msg, prefix, l, chr);
+	    match res {
+		Some(next) => {
+		    *l = next;
+		}
+		None => {
+		    let mut m = Buffer::new();
+		    m.extend(msg.drain());
+		    let mut p = Buffer::new();
+		    p.extend(prefix.drain());
+                    *ls = ParseResult {
+                        prefix: p,
+                        msg: m,
+		    };
+		    return;
+		}
+	    }
 	}
     }
 }
