@@ -27,8 +27,8 @@ where
     }
     )]
     struct CustomBidirectionalReport {
-	input_buffer: [u8; 32],
-	output_buffer: [u8; 32],
+	input_buffer: [u8; 64],
+	output_buffer: [u8; 64],
     }
     let hid = HIDClass::new(usb_bus, CustomBidirectionalReport::desc(), 10); // 10ms Polling-Intervall
     let usb_dev = UsbDeviceBuilder::new(usb_bus, UsbVidPid(0x1209, 0x0001))
