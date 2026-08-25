@@ -1,5 +1,6 @@
 #![no_std]
 
+pub mod config;
 pub mod stm32_dfu_bootloader;
 pub use stm32_dfu_bootloader as bootloader;
 pub mod cmd;

@@ -1,4 +1,3 @@
-use git_version::git_version;
 use usbd_hid::{hid_class::HIDClass};
 use usbd_hid::descriptor::generator_prelude::*;
 
@@ -10,7 +9,7 @@ use usb_device::device::UsbRev;
 use usb_device::prelude::StringDescriptors;
 use usb_device::LangID;
 
-const VERSION: &str = git_version!(prefix = "git:", cargo_prefix = "cargo:", fallback = "unknown");
+use crate::config;
 
 pub type MyUsb<'a, B> = (UsbDevice<'a, B> , HIDClass<'a, B> );
 
@@ -31,12 +30,12 @@ where
 	output_buffer: [u8; 64],
     }
     let hid = HIDClass::new(usb_bus, CustomBidirectionalReport::desc(), 10); // 10ms Polling-Intervall
-    let usb_dev = UsbDeviceBuilder::new(usb_bus, UsbVidPid(0x1209, 0x0001))
+    let usb_dev = UsbDeviceBuilder::new(usb_bus, UsbVidPid(config::USB_VID, config::USB_PID))
         .strings(&[
            StringDescriptors::new(LangID::EN)
-                .manufacturer("DM1MF")
-                .product("RigToUSB")
-                .serial_number(VERSION)
+                .manufacturer(config::USB_MANUFACTURER)
+                .product(config::USB_PRODUCT)
+                .serial_number(config::VERSION)
         ])
 	.expect("Cannot set USB String Descriptors")
 	.usb_rev(UsbRev::Usb200)

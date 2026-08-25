@@ -1,15 +1,10 @@
 use ringbuffer::{ConstGenericRingBuffer, RingBuffer};
 
+use crate::config;
+use crate::config::XK852_MAX_LINE_LEN;
 use crate::board::Board;
 
-const MAX_LINE_LEN: usize = 32;
-
-//const LF: u8 = 10;
-//const CR: u8 = 13;
-const LF: u8 = '(' as u8;
-const CR: u8 = ')' as u8;
-
-type Buffer = ConstGenericRingBuffer::<u8, MAX_LINE_LEN>;
+type Buffer = ConstGenericRingBuffer::<u8, XK852_MAX_LINE_LEN>;
 
 #[derive(Debug)]
 pub enum Line {
@@ -21,7 +16,7 @@ use Line::*;
 fn add_char(msg: &mut Buffer, discarded: &mut Buffer, l: &mut Line, chr: u8) -> Option<Line>
 {
     match *l {
-	NoLF => if chr == LF
+	NoLF => if chr == config::XK852_LF
 	{
 	    msg.enqueue(chr);
 	    return Some(LFSeen);
@@ -32,12 +27,12 @@ fn add_char(msg: &mut Buffer, discarded: &mut Buffer, l: &mut Line, chr: u8) -> 
 	    return Some(NoLF);
 	}
 	LFSeen => match chr {
-	    LF => {
+	    config::XK852_LF => {
 		discarded.extend(msg.drain());
 		msg.enqueue(chr);
 		return Some(LFSeen);
 	    }
-	    CR => {
+	    config::XK852_CR => {
                 msg.enqueue(chr);
 		return None;
 	    }
