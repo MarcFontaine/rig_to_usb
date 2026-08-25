@@ -6,7 +6,7 @@ edition = "2024"
 [features]
 default = []
 defmt = ["dep:defmt"]
-std-json = ["dep:serde", "dep:serde_json", "minicbor/alloc"]
+std-json = ["dep:serde", "dep:serde_json", "minicbor/alloc", "dep:nix" ]
 
 [dependencies]
 minicbor = { version = "2.2", features = ["derive"] }
@@ -14,8 +14,14 @@ defmt = { version = "0.3", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true}
 serde_json = { version = "1.0", optional = true }
 ringbuffer = { version = "0.16.0", default-features = false }
+nix = { version = "0.31.1", features = [ "fs", "term"], default-features = false, optional = true }
 
 [[bin]]
 name = "stdin_to_cbor"
 path = "src/stdin_to_cbor.rs"
+required-features = ["std-json"]
+
+[[bin]]
+name = "pty_bridge"
+path = "src/pty_bridge.rs"
 required-features = ["std-json"]
