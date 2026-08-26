@@ -5,6 +5,7 @@ pub use defmt::{info, warn, error};
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Decode, Encode, Debug)]
+#[cbor(map)]
 pub struct HIDReport<'a> {
     #[n(0)]
     #[cbor(with = "minicbor::bytes")]
