@@ -23,13 +23,36 @@
       # targets.wasm32-unknown-unknown.latest.rust-std
       targets.wasm32v1-none.latest.rust-std
     ];
+    gst_webrtc = (pkgs.gst_all_1.gst-plugins-rs
+      .override {plugins = [ "webrtc" "rtp" ]; })
+      .overrideAttrs (oldAttrs: {
+        preBuild = (oldAttrs.preBuild or "") + ''
+          find . -type d -name "tests" -exec rm -rf {} +
+          find . -type d -name "benches" -exec rm -rf {} +
+        '';
+      });
+    gstPluginPaths = pkgs.lib.makeSearchPathOutput "lib" "/lib/gstreamer-1.0" (
+    with pkgs;
+    [
+      gst_all_1.gstreamer
+      gst_all_1.gst-plugins-base
+      gst_all_1.gst-plugins-good
+      gst_all_1.gst-plugins-ugly
+      gst_all_1.gst-plugins-bad
+#      gst_all_1.gst-plugins-rs
+      gst_webrtc
+      libnice
+    ]
+  );
+
   in
     {
+    inherit gst_webrtc;
     test = fenix.packages.x86_64-linux;
     inherit pkgs;
     devShells.x86_64-linux.default = pkgs.mkShell {
       name = "rust-devshell";
-
+      nativeBuildInputs = [ pkgs.pkg-config ];
       buildInputs = with pkgs; [
         toolchain
         probe-rs-tools
@@ -43,6 +66,16 @@
         # wasm-bindgen-cli_0_2_126 # for std
         twiggy # analyse .wasm
         wabt # webassembly tools wasm-strip target/wasm32-unknown-unknown/release/dein_projekt.wasm
+        # remote-adapter / gstreamer
+        glib
+#        glibc.dev
+        gst_all_1.gstreamer.dev
+        gst_all_1.gst-plugins-base.dev
+        gst_all_1.gst-plugins-good.dev
+        gst_all_1.gst-plugins-bad.dev
+        gst_all_1.gst-plugins-ugly.dev
+#        gst_all_1.gst-plugins-rs.dev
+        gst_webrtc.dev
       ];
 
       CARGO_BUILD_TARGET = "thumbv7em-none-eabihf";
@@ -55,6 +88,17 @@
         export RUST_SRC_PATH="${toolchain}/lib/rustlib/src/rust/library"
         export PATH="${toolchain}/bin:$PATH"
         export EVCXR_COMPLETION_TYPE=circular
+        export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [
+          pkgs.glib
+          pkgs.gst_all_1.gstreamer
+          pkgs.gst_all_1.gst-plugins-base
+          pkgs.gst_all_1.gst-plugins-good
+          pkgs.gst_all_1.gst-plugins-bad
+          pkgs.gst_all_1.gst-plugins-ugly
+#         pkgs.gst_all_1.gst-plugins-rs
+          gst_webrtc
+        ]}:$LD_LIBRARY_PATH"
+        export GST_PLUGIN_SYSTEM_PATH_1_0=${gstPluginPaths}
         echo "Rust DevShell aktiv!"
         echo "Rust-Version: $(rustc --version)"
       '';
