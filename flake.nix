@@ -26,10 +26,7 @@
     gst_webrtc = (pkgs.gst_all_1.gst-plugins-rs
       .override {plugins = [ "webrtc" "rtp" ]; })
       .overrideAttrs (oldAttrs: {
-        preBuild = (oldAttrs.preBuild or "") + ''
-          find . -type d -name "tests" -exec rm -rf {} +
-          find . -type d -name "benches" -exec rm -rf {} +
-        '';
+        doCheck = false;
       });
     gstPluginPaths = pkgs.lib.makeSearchPathOutput "lib" "/lib/gstreamer-1.0" (
     with pkgs;

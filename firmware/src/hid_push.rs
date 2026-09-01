@@ -4,6 +4,7 @@ use ringbuffer::RingBuffer;
 use usb_device::class_prelude::UsbBus;
 use usb_device::prelude::*;
 
+use crate::config::XK852_MAX_LINE_LEN;
 use crate::usb::{MyUsb};
 use crate::xk852line;
 use rig_to_usb_logic::hid_report::HIDReport;
@@ -13,12 +14,12 @@ pub fn hid_push<'a, B: UsbBus>
     ls: &mut xk852line::LineState)
 {
     if let xk852line::LineState::ParseResult{msg, prefix} = ls {
-        let mut rx = [0u8; 32];
-	for (slot, &val) in rx.iter_mut().zip(msg.iter().take(32)) {
+        let mut rx = [0u8; XK852_MAX_LINE_LEN];
+	for (slot, &val) in rx.iter_mut().zip(msg.iter().take(XK852_MAX_LINE_LEN)) {
             *slot = val;
 	}
-        let mut skipped = [0u8; 32];
-	for (slot, &val) in skipped.iter_mut().zip(prefix.iter().take(32)) {
+        let mut skipped = [0u8; XK852_MAX_LINE_LEN];
+	for (slot, &val) in skipped.iter_mut().zip(prefix.iter().take(XK852_MAX_LINE_LEN)) {
             *slot = val;
 	}
         let report = HIDReport {
