@@ -8,8 +8,8 @@ use crate::uart_tx;
 use crate::uart_iterator;
 
 pub type LedPin = Pin<'C',13, Output<PushPull>>;
-pub type Hochschalten = Pin<'C',14, Output<PushPull>>;
-pub type OnOff = Pin<'C',15, Output<PushPull>>;
+pub type Hochschalten = Pin<'A',0, Output<PushPull>>;
+pub type OnOff = Pin<'A',1, Output<PushPull>>;
 
 pub struct Board {
     pub led: LedPin,

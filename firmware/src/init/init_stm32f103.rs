@@ -93,8 +93,8 @@ pub fn init_rcc() ->
 
     let mut board = Board {
         led: gpioc.pc13.into_push_pull_output(&mut gpioc.crh),
-        hochschalten: gpioc.pc14.into_push_pull_output(&mut gpioc.crh),
-	on_off: gpioc.pc15.into_push_pull_output(&mut gpioc.crh),
+        hochschalten: gpioa.pa0.into_push_pull_output(&mut gpioa.crl),
+	on_off: gpioa.pa1.into_push_pull_output(&mut gpioa.crl),
 	cat_tx: uart_tx::init_tx(tx_channel.with_dma(dma.4)),
 	cat_rx: uart_iterator::PollingReceiver::new(rx_channel, dma.5),
     };
