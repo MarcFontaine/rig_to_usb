@@ -1,9 +1,9 @@
-use minicbor::{Decode, Encode};
 #[cfg(any(feature = "std-json", feature = "defmt"))]
 use minicbor::encode::write::Cursor;
+use minicbor::{Decode, Encode};
 
 #[cfg(feature = "defmt")]
-pub use defmt::{info, warn, error};
+pub use defmt::{error, info, warn};
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Decode, Encode, Debug)]
@@ -20,45 +20,66 @@ pub enum Cmd<'a> {
     #[n(3)]
     Reset,
     #[n(4)]
-    LED{#[n(0)] value: bool},
+    LED {
+        #[n(0)]
+        value: bool,
+    },
     #[n(5)]
-    LEDBlink{#[n(0)] interval: u16},
+    LEDBlink {
+        #[n(0)]
+        interval: u16,
+    },
     #[n(6)]
-    RadioOn{#[n(0)] time: u32},
+    RadioOn {
+        #[n(0)]
+        time: u32,
+    },
     #[n(7)]
     RadioOff,
     #[n(8)]
-    TxOn{#[n(0)] time: u32},
+    TxOn {
+        #[n(0)]
+        time: u32,
+    },
     #[n(9)]
     TxOff,
     #[n(10)]
-    MorseSpeed{#[n(0)] ditlen: u16},
+    MorseSpeed {
+        #[n(0)]
+        ditlen: u16,
+    },
     #[n(11)]
-    MorseSend{ #[cbor(n(0), with = "minicbor::bytes")] txt: &'a [u8]},
+    MorseSend {
+        #[cbor(n(0), with = "minicbor::bytes")]
+        txt: &'a [u8],
+    },
     #[n(12)]
-    MorseAppend{ #[cbor(n(0), with = "minicbor::bytes")] txt: &'a [u8]},
+    MorseAppend {
+        #[cbor(n(0), with = "minicbor::bytes")]
+        txt: &'a [u8],
+    },
     #[n(13)]
-    SendCat{ #[cbor(n(0), with = "minicbor::bytes")] bytes: &'a [u8]},
+    SendCat {
+        #[cbor(n(0), with = "minicbor::bytes")]
+        bytes: &'a [u8],
+    },
 }
 
 #[cfg(any(feature = "std-json", feature = "defmt"))]
-pub fn encode_test(cmd: Cmd)
--> ()
-{
+pub fn encode_test(cmd: Cmd) -> () {
     let mut tx_buffer1 = [0u8; 64];
     let mut cursor1 = Cursor::new(&mut tx_buffer1[..]);
     match minicbor::encode(&cmd, &mut cursor1) {
-	Ok(_) => {
+        Ok(_) => {
             let bytes_written = cursor1.position();
             let encoded_slice = &tx_buffer1[..bytes_written];
             info!("Encoded: {=[u8]:x}", encoded_slice);
             println!("Encoded: {:?}", encoded_slice);
         }
-	Err(_err) => {
-//            info!("Encode Error: {}", err);
+        Err(_err) => {
+            //            info!("Encode Error: {}", err);
             println!("Encoded Error");
-
-	}
+        }
     }
 }
 
@@ -71,14 +92,14 @@ pub fn decode_test
 {
     let mut decoder = minicbor::Decoder::new(&packet);
     match decoder.decode::<Cmd>() {
-	Ok(cmd) => {
+    Ok(cmd) => {
             defmt::info!("cbor decode message: {}", cmd);
-	}
-	Err(_err) => {
-	    defmt::info!("cbor decode error");
-	    defmt::info!("cbor decode daten: {=[u8]:x}", packet);
-	    defmt::info!("cbor decode daten: {}", packet);
-	}
+    }
+    Err(_err) => {
+        defmt::info!("cbor decode error");
+        defmt::info!("cbor decode daten: {=[u8]:x}", packet);
+        defmt::info!("cbor decode daten: {}", packet);
+    }
     }
 }
 

@@ -3,7 +3,7 @@
 #![no_std]
 #![no_main]
 
-use crate::hal::{*};
+use crate::hal::*;
 use utils::logger::info;
 
 #[macro_use]

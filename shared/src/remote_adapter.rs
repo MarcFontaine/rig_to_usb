@@ -1,8 +1,7 @@
-use std::env;
-use gstreamer::prelude::*;
 use gstreamer as gst;
+use gstreamer::prelude::*;
 use gstreamer_webrtc;
-
+use std::env;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
@@ -67,10 +66,12 @@ fn setup_webrtcsink(webrtcsink: &gst::Element) {
 
         let channel = webrtcbin.emit_by_name::<gstreamer_webrtc::WebRTCDataChannel>(
             "create-data-channel",
-            &[&"remote-qth", &options]
+            &[&"remote-qth", &options],
         );
-        println!("Successfully created data channel: {}",
-		 channel.label().as_deref().unwrap_or("unknown"));
+        println!(
+            "Successfully created data channel: {}",
+            channel.label().as_deref().unwrap_or("unknown")
+        );
         channel.connect("on-message-string", false, move |args| {
             let msg: String = args[1].get().unwrap();
             println!("Received message from peer {}: {}", peer_id, msg);

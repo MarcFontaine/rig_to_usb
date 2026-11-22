@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std-json"), no_std)]
 
 #[cfg(feature = "defmt")]
-pub use defmt::{info, warn, error};
+pub use defmt::{error, info, warn};
 
 #[cfg(not(feature = "defmt"))]
 #[macro_export]
@@ -51,7 +51,7 @@ macro_rules! print {
     ($($arg:tt)*) => {};
 }
 
-pub mod hid_report;
 pub mod cmd;
+pub mod hid_report;
 pub mod morse;
 pub mod test;

@@ -21,47 +21,47 @@ impl<T> Shared<T> {
 }
 
 #[unsafe(export_name = "PANIC")]
-static PANIC:Shared<[u8; BUFFER_SIZE]> = Shared::new([0; BUFFER_SIZE]);
+static PANIC: Shared<[u8; BUFFER_SIZE]> = Shared::new([0; BUFFER_SIZE]);
 #[unsafe(export_name = "ERR")]
-static ERR:Shared<bool> = Shared::new(false);
+static ERR: Shared<bool> = Shared::new(false);
 #[unsafe(export_name = "TXT")]
-static TXT:Shared<[u8; BUFFER_SIZE]> = Shared::new([0; BUFFER_SIZE]);
+static TXT: Shared<[u8; BUFFER_SIZE]> = Shared::new([0; BUFFER_SIZE]);
 #[unsafe(export_name = "CBOR")]
-static CBOR:Shared<[u8; BUFFER_SIZE]> = Shared::new([0; BUFFER_SIZE]);
+static CBOR: Shared<[u8; BUFFER_SIZE]> = Shared::new([0; BUFFER_SIZE]);
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn start_bootloader() -> usize {
-  return_encoded(StartBootLoader)
+    return_encoded(StartBootLoader)
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn panic_cmd() -> usize {
-  return_encoded(Panic)
+    return_encoded(Panic)
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn test() -> usize {
-  return_encoded(Test)
+    return_encoded(Test)
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn reset() -> usize {
-  return_encoded(Reset)
+    return_encoded(Reset)
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn led(v: bool) -> usize {
-    return_encoded(LED{ value: v})
+    return_encoded(LED { value: v })
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn led_blink(i: u32) -> usize {
-    return_encoded(LEDBlink{ interval: i})
+    return_encoded(LEDBlink { interval: i })
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn radio_on(i: u32) -> usize {
-    return_encoded(RadioOn{ time: i})
+    return_encoded(RadioOn { time: i })
 }
 
 #[unsafe(no_mangle)]
@@ -71,7 +71,7 @@ pub unsafe extern "C" fn radio_off() -> usize {
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn tx_on(i: u32) -> usize {
-    return_encoded(TxOn{ time: i})
+    return_encoded(TxOn { time: i })
 }
 
 #[unsafe(no_mangle)]
@@ -81,42 +81,38 @@ pub unsafe extern "C" fn tx_off() -> usize {
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn morse_speed(i: u16) -> usize {
-    return_encoded(MorseSpeed{ ditlen: i})
+    return_encoded(MorseSpeed { ditlen: i })
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn morse_send(len: usize) -> usize {
-    unsafe{
-	let ptr = TXT.get() as *mut u8;
+    unsafe {
+        let ptr = TXT.get() as *mut u8;
         let slice = core::slice::from_raw_parts_mut(ptr, len);
-	return_encoded(MorseSend{ txt: slice})
+        return_encoded(MorseSend { txt: slice })
     }
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn morse_append(len: usize) -> usize {
-    unsafe{
-	let ptr = TXT.get() as *mut u8;
+    unsafe {
+        let ptr = TXT.get() as *mut u8;
         let slice = core::slice::from_raw_parts_mut(ptr, len);
-	return_encoded(MorseAppend{ txt: slice})
+        return_encoded(MorseAppend { txt: slice })
     }
 }
 
 fn return_encoded(cmd: Cmd) -> usize {
     unsafe {
-    let ptr = CBOR.get() as *mut u8;
-    let slice = core::slice::from_raw_parts_mut(ptr, BUFFER_SIZE);
+        let ptr = CBOR.get() as *mut u8;
+        let slice = core::slice::from_raw_parts_mut(ptr, BUFFER_SIZE);
 
-    let mut cursor = Cursor::new(&mut *slice);
+        let mut cursor = Cursor::new(&mut *slice);
 
-    match minicbor::encode(&cmd, &mut cursor) {
-        Ok(_) => {
-	    return cursor.position()
-	}
-	Err(_) => {
-	    return 0
-	}
-    };
+        match minicbor::encode(&cmd, &mut cursor) {
+            Ok(_) => return cursor.position(),
+            Err(_) => return 0,
+        };
     };
 }
 
@@ -129,9 +125,9 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     };
 
     unsafe {
-      *ERR.get() = true;
-//      host_panic(msg.as_ptr(), msg.len());
+        *ERR.get() = true;
+        //      host_panic(msg.as_ptr(), msg.len());
     }
-    
+
     core::arch::wasm32::unreachable()
 }

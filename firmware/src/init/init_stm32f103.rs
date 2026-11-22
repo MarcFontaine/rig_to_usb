@@ -2,16 +2,16 @@ use cortex_m::asm::delay;
 
 use usb_device::class_prelude::UsbBusAllocator;
 
-use stm32f1xx_hal::rcc;
-use stm32f1xx_hal::usb::UsbBus as UsbBusHal;
-use stm32f1xx_hal::usb::Peripheral;
-use stm32f1xx_hal::pac::Peripherals;
-use stm32f1xx_hal::gpio::PinState;
-use stm32f1xx_hal::prelude::_stm32_hal_rcc_RccExt;
-use stm32f1xx_hal::gpio::GpioExt;
-use stm32f1xx_hal::prelude::_fugit_RateExtU32;
-use stm32f1xx_hal::prelude::_fugit_ExtU32;
 use stm32f1xx_hal::flash::FlashExt;
+use stm32f1xx_hal::gpio::GpioExt;
+use stm32f1xx_hal::gpio::PinState;
+use stm32f1xx_hal::pac::Peripherals;
+use stm32f1xx_hal::prelude::_fugit_ExtU32;
+use stm32f1xx_hal::prelude::_fugit_RateExtU32;
+use stm32f1xx_hal::prelude::_stm32_hal_rcc_RccExt;
+use stm32f1xx_hal::rcc;
+use stm32f1xx_hal::usb::Peripheral;
+use stm32f1xx_hal::usb::UsbBus as UsbBusHal;
 use stm32f1xx_hal::watchdog::IndependentWatchdog;
 
 use crate::hal;
@@ -19,9 +19,9 @@ use stm32f1xx_hal::dma::DmaExt;
 
 use static_cell::StaticCell;
 
-use crate::board::{Board};
-use crate::uart_tx;
+use crate::board::Board;
 use crate::uart_iterator;
+use crate::uart_tx;
 
 pub const SYSTEM_CLOCK_MHZ: u32 = 72;
 
@@ -29,13 +29,11 @@ pub type BoardUsbBus = UsbBusHal<Peripheral>;
 
 static USB_BUS_ALLOCATOR: StaticCell<UsbBusAllocator<BoardUsbBus>> = StaticCell::new();
 
-pub fn init_rcc() ->
-    (
-	IndependentWatchdog,
-	&'static UsbBusAllocator<BoardUsbBus>,
-	Board
-    )
-{
+pub fn init_rcc() -> (
+    IndependentWatchdog,
+    &'static UsbBusAllocator<BoardUsbBus>,
+    Board,
+) {
     let mut cp = cortex_m::Peripherals::take().unwrap();
     cp.DCB.enable_trace();
     cp.DWT.enable_cycle_counter();
@@ -45,24 +43,26 @@ pub fn init_rcc() ->
     // bugfix !! start watchdog twice
     let mut watchdog = IndependentWatchdog::new(dp.IWDG);
     watchdog.start(10000_u32.millis());
-    delay( 500*SYSTEM_CLOCK_MHZ );
+    delay(500 * SYSTEM_CLOCK_MHZ);
     watchdog.start(10000_u32.millis());
 
     let mut flash = dp.FLASH.constrain();
     let mut clocks = dp.RCC.freeze(
-        rcc::Config::hse(8.MHz()).sysclk(SYSTEM_CLOCK_MHZ.MHz()).pclk1(36.MHz()),
+        rcc::Config::hse(8.MHz())
+            .sysclk(SYSTEM_CLOCK_MHZ.MHz())
+            .pclk1(36.MHz()),
         &mut flash.acr,
     );
 
     let mut gpioa = dp.GPIOA.split(&mut clocks);
     let mut gpioc = dp.GPIOC.split(&mut clocks);
 
-    gpioa.pa12.as_push_pull_output_with_state(
-	&mut gpioa.crh,
-	PinState::Low,
-        |_pin| { delay( 50*1000*SYSTEM_CLOCK_MHZ ) }
-    );
-// todo: see if st_bus.force_reenumeration() works
+    gpioa
+        .pa12
+        .as_push_pull_output_with_state(&mut gpioa.crh, PinState::Low, |_pin| {
+            delay(50 * 1000 * SYSTEM_CLOCK_MHZ)
+        });
+    // todo: see if st_bus.force_reenumeration() works
 
     let usb_peripheral = Peripheral {
         usb: dp.USB,
@@ -80,7 +80,7 @@ pub fn init_rcc() ->
         dp.USART1,
         (tx, rx),
         hal::serial::Config::default()
-	    .baudrate(hal::time::Bps(9600))
+            .baudrate(hal::time::Bps(9600))
             .wordlength_8bits()
             .parity_even()
             .stopbits(hal::serial::StopBits::STOP1),
@@ -94,14 +94,11 @@ pub fn init_rcc() ->
     let mut board = Board {
         led: gpioc.pc13.into_push_pull_output(&mut gpioc.crh),
         hochschalten: gpioa.pa0.into_push_pull_output(&mut gpioa.crl),
-	on_off: gpioa.pa1.into_push_pull_output(&mut gpioa.crl),
-	cat_tx: uart_tx::init_tx(tx_channel.with_dma(dma.4)),
-	cat_rx: uart_iterator::PollingReceiver::new(rx_channel, dma.5),
+        on_off: gpioa.pa1.into_push_pull_output(&mut gpioa.crl),
+        cat_tx: uart_tx::init_tx(tx_channel.with_dma(dma.4)),
+        cat_rx: uart_iterator::PollingReceiver::new(rx_channel, dma.5),
     };
     board.radio_off();
     board.tx_off();
-    (watchdog,
-     st_bus,
-     board
-    )
+    (watchdog, st_bus, board)
 }

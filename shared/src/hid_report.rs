@@ -1,7 +1,7 @@
 use minicbor::{Decode, Encode};
 
 #[cfg(feature = "defmt")]
-pub use defmt::{info, warn, error};
+pub use defmt::{error, info, warn};
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Decode, Encode, Debug)]
@@ -9,8 +9,8 @@ pub use defmt::{info, warn, error};
 pub struct HIDReport<'a> {
     #[n(0)]
     #[cbor(with = "minicbor::bytes")]
-    pub cat_rx_msg : Option <&'a [u8]>,
+    pub cat_rx_msg: Option<&'a [u8]>,
     #[n(1)]
     #[cbor(with = "minicbor::bytes")]
-    pub cat_rx_skipped : Option <&'a [u8]>
+    pub cat_rx_skipped: Option<&'a [u8]>,
 }

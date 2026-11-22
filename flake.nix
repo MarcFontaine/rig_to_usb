@@ -120,6 +120,7 @@
         flip-link
         cargo-edit
         rust-analyzer
+        rustfmt
         dfu-util
         evcxr
         # wasm-bindgen-cli_0_2_126 # for std

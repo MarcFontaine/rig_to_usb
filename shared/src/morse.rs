@@ -8,7 +8,7 @@ pub enum MorseState {
 use MorseState::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Symbol {    
+pub enum Symbol {
     Dit,
     Dah,
 }
@@ -58,29 +58,28 @@ pub fn morse_char(c: u8) -> &'static [Symbol] {
         b'0' => &[Dah, Dah, Dah, Dah, Dah],
 
         // Gängige Sonderzeichen
-        b'.' => &[Dit, Dah, Dit, Dah, Dit, Dah],         // Punkt
-        b',' => &[Dah, Dah, Dit, Dit, Dah, Dah],         // Komma
-        b'?' => &[Dit, Dit, Dah, Dah, Dit, Dit],         // Fragezeichen
-        b'\'' => &[Dit, Dah, Dah, Dah, Dah, Dit],        // Apostroph
-        b'!' => &[Dah, Dit, Dah, Dit, Dah, Dah],         // Ausrufezeichen
-        b'/' => &[Dah, Dit, Dit, Dah, Dit],              // Schrägstrich
-        b'(' => &[Dah, Dit, Dah, Dah, Dit],              // Klammer auf
-        b')' => &[Dah, Dit, Dah, Dah, Dit, Dah],         // Klammer zu
-        b'&' => &[Dit, Dah, Dit, Dit, Dit],              // Und-Zeichen
-        b':' => &[Dah, Dah, Dah, Dit, Dit, Dit],         // Doppelpunkt
-        b';' => &[Dah, Dit, Dah, Dit, Dah, Dit],         // Semikolon
-        b'=' => &[Dah, Dit, Dit, Dit, Dah],              // Gleichheitszeichen
-        b'+' => &[Dit, Dah, Dit, Dah, Dit],              // Plus
-        b'-' => &[Dah, Dit, Dit, Dit, Dit, Dah],         // Bindestrich/Minus
-        b'_' => &[Dit, Dit, Dah, Dah, Dit, Dah],         // Unterstrich
-        b'"' => &[Dit, Dah, Dit, Dit, Dah, Dit],         // Anführungszeichen
-        b'$' => &[Dit, Dit, Dit, Dah, Dit, Dit, Dah],    // Dollar
-        b'@' => &[Dit, Dah, Dah, Dit, Dah, Dit],         // At-Zeichen
+        b'.' => &[Dit, Dah, Dit, Dah, Dit, Dah],  // Punkt
+        b',' => &[Dah, Dah, Dit, Dit, Dah, Dah],  // Komma
+        b'?' => &[Dit, Dit, Dah, Dah, Dit, Dit],  // Fragezeichen
+        b'\'' => &[Dit, Dah, Dah, Dah, Dah, Dit], // Apostroph
+        b'!' => &[Dah, Dit, Dah, Dit, Dah, Dah],  // Ausrufezeichen
+        b'/' => &[Dah, Dit, Dit, Dah, Dit],       // Schrägstrich
+        b'(' => &[Dah, Dit, Dah, Dah, Dit],       // Klammer auf
+        b')' => &[Dah, Dit, Dah, Dah, Dit, Dah],  // Klammer zu
+        b'&' => &[Dit, Dah, Dit, Dit, Dit],       // Und-Zeichen
+        b':' => &[Dah, Dah, Dah, Dit, Dit, Dit],  // Doppelpunkt
+        b';' => &[Dah, Dit, Dah, Dit, Dah, Dit],  // Semikolon
+        b'=' => &[Dah, Dit, Dit, Dit, Dah],       // Gleichheitszeichen
+        b'+' => &[Dit, Dah, Dit, Dah, Dit],       // Plus
+        b'-' => &[Dah, Dit, Dit, Dit, Dit, Dah],  // Bindestrich/Minus
+        b'_' => &[Dit, Dit, Dah, Dah, Dit, Dah],  // Unterstrich
+        b'"' => &[Dit, Dah, Dit, Dit, Dah, Dit],  // Anführungszeichen
+        b'$' => &[Dit, Dit, Dit, Dah, Dit, Dit, Dah], // Dollar
+        b'@' => &[Dit, Dah, Dah, Dit, Dah, Dit],  // At-Zeichen
         // Unbekannte Zeichen / Leerzeichen
         _ => &[],
     }
 }
-
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CharState {
@@ -91,40 +90,39 @@ pub enum CharState {
 use CharState::*;
 
 // pause_len must be >= 1
-pub fn next_pin_state_char(pause_len: u8, s: CharState) -> Option<(MorseState, CharState)>
-{
+pub fn next_pin_state_char(pause_len: u8, s: CharState) -> Option<(MorseState, CharState)> {
     match s {
-	S([]) => None,
-	S([Dit, rest @ ..]) => Some((High, H(1,rest))),
-	S([Dah, rest @ ..]) => Some((High, H(3,rest))),
-	L(1,[]) => None,
-	L(1,[Dit, rest @ ..]) => Some((High, H(1,rest))),
-	L(1,[Dah, rest @ ..]) => Some((High, H(3,rest))),
-	L(n,s) => Some((Low, L(n-1, s))),
-	H(1,[]) => Some((Low, L(pause_len, &[]))),
-	H(1,s) => Some((Low, L(1, s))),
-	H(n,s) => Some((High, H(n-1, s))),
+        S([]) => None,
+        S([Dit, rest @ ..]) => Some((High, H(1, rest))),
+        S([Dah, rest @ ..]) => Some((High, H(3, rest))),
+        L(1, []) => None,
+        L(1, [Dit, rest @ ..]) => Some((High, H(1, rest))),
+        L(1, [Dah, rest @ ..]) => Some((High, H(3, rest))),
+        L(n, s) => Some((Low, L(n - 1, s))),
+        H(1, []) => Some((Low, L(pause_len, &[]))),
+        H(1, s) => Some((Low, L(1, s))),
+        H(n, s) => Some((High, H(n - 1, s))),
     }
 }
 
-pub fn test()
-{
+pub fn test() {
     print!("->");
-    let mut s = S( &[Dit, Dit, Dah, Dah, Dit, Dit] );
+    let mut s = S(&[Dit, Dit, Dah, Dah, Dit, Dit]);
     loop {
-	match next_pin_state_char(10, s) {
-	    None => { break;}
-	    Some((High, n)) => {
-		print!("#");
-		s = n;
-	    }
-	    Some((Low, n)) => {
-		print!(" ");
-		s = n;
-	    }
-
-	}
-    };
+        match next_pin_state_char(10, s) {
+            None => {
+                break;
+            }
+            Some((High, n)) => {
+                print!("#");
+                s = n;
+            }
+            Some((Low, n)) => {
+                print!(" ");
+                s = n;
+            }
+        }
+    }
     println!("<-");
 }
 
@@ -133,61 +131,59 @@ const MORSE_BUFFER_SIZE: usize = 80;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LineState {
     pub state: CharState,
-    pub chars: ConstGenericRingBuffer::<u8, MORSE_BUFFER_SIZE>,
+    pub chars: ConstGenericRingBuffer<u8, MORSE_BUFFER_SIZE>,
 }
 
 impl LineState {
     pub fn empty() -> Self {
-	LineState {
-	    state: S(&[]),
-            chars : ConstGenericRingBuffer::<u8, MORSE_BUFFER_SIZE>::new(),
-	}
+        LineState {
+            state: S(&[]),
+            chars: ConstGenericRingBuffer::<u8, MORSE_BUFFER_SIZE>::new(),
+        }
     }
     pub fn init(txt: &[u8]) -> Self {
-	let mut l = LineState::empty();
-	l.chars.extend(txt.iter().copied());
+        let mut l = LineState::empty();
+        l.chars.extend(txt.iter().copied());
         l
     }
-    pub fn append(&mut self, txt: &[u8])
-    {
-	self.chars.extend(txt.iter().copied());
+    pub fn append(&mut self, txt: &[u8]) {
+        self.chars.extend(txt.iter().copied());
     }
 }
 
-pub fn next_pin_state(mut ls: LineState) -> Option<(MorseState, LineState)>
-{
-    match ( ls.chars.peek(), next_pin_state_char(3, ls.state) ) {
-	(_,  Some((level, next))) => {
-	    ls.state = next;
-	    Some((level,ls))
-	}
-	(None, None) => None,
-	(Some(char), None) => {
-	    ls.state = S(morse_char(*char));
-	    ls.chars.dequeue();
-	    next_pin_state(ls)
-	}
+pub fn next_pin_state(mut ls: LineState) -> Option<(MorseState, LineState)> {
+    match (ls.chars.peek(), next_pin_state_char(3, ls.state)) {
+        (_, Some((level, next))) => {
+            ls.state = next;
+            Some((level, ls))
+        }
+        (None, None) => None,
+        (Some(char), None) => {
+            ls.state = S(morse_char(*char));
+            ls.chars.dequeue();
+            next_pin_state(ls)
+        }
     }
 }
 
-pub fn test2()
-{
+pub fn test2() {
     print!("->");
-    let mut s = LineState::init (b"Hello");
+    let mut s = LineState::init(b"Hello");
 
     loop {
-	match next_pin_state(s) {
-	    None => { break;}
-	    Some((High, n)) => {
-		print!("#");
-		s = n;
-	    }
-	    Some((Low, n)) => {
-		print!(" ");
-		s = n;
-	    }
-
-	}
-    };
+        match next_pin_state(s) {
+            None => {
+                break;
+            }
+            Some((High, n)) => {
+                print!("#");
+                s = n;
+            }
+            Some((Low, n)) => {
+                print!(" ");
+                s = n;
+            }
+        }
+    }
     println!("<-");
 }

@@ -1,8 +1,8 @@
 use cortex_m::asm::delay;
 
-use crate::hal::{*};
-use usb_device::class_prelude::UsbBusAllocator;
+use crate::hal::*;
 use static_cell::StaticCell;
+use usb_device::class_prelude::UsbBusAllocator;
 
 pub const SYSTEM_CLOCK_MHZ: u32 = 150;
 use crate::pins;
@@ -16,20 +16,18 @@ pub struct BoardPeripherals {
     pub usb_bus: &'static UsbBusAllocator<BoardUsbBus>,
 }
 
-pub fn init_rcc() -> BoardPeripherals
-{
+pub fn init_rcc() -> BoardPeripherals {
     let dp = Peripherals::take().expect("cannot take peripherals");
 
     let pwr = dp.PWR.constrain().freeze();
- 
+
     let mut pll_config = stm32g4xx_hal::rcc::PllConfig::default();
     pll_config.mux = PllSrc::HSE(8_u32.MHz());
     pll_config.m = PllMDiv::DIV_2;
     pll_config.n = PllNMul::MUL_75;
     pll_config.r = Some(PllRDiv::DIV_2);
 
-    let config = rcc::Config::new(rcc::SysClockSrc::PLL)
-      .pll_cfg(pll_config);
+    let config = rcc::Config::new(rcc::SysClockSrc::PLL).pll_cfg(pll_config);
 
     let mut rcc = dp.RCC.freeze(config, pwr);
     rcc.enable_hsi48();
@@ -37,7 +35,7 @@ pub fn init_rcc() -> BoardPeripherals
     // TODO: test watchdog
     let mut watchdog = IndependentWatchdog::new(dp.IWDG);
     watchdog.start(10000_u32.millis());
-    delay( 500*SYSTEM_CLOCK_MHZ );
+    delay(500 * SYSTEM_CLOCK_MHZ);
     watchdog.start(10000_u32.millis());
 
     let gpioa = dp.GPIOA.split(&mut rcc);
@@ -54,7 +52,7 @@ pub fn init_rcc() -> BoardPeripherals
 
     BoardPeripherals {
         watchdog: watchdog,
-	led: led::new(dp.GPIOC.split(&mut rcc).pc6.into_push_pull_output()),
-	usb_bus: st_bus
+        led: led::new(dp.GPIOC.split(&mut rcc).pc6.into_push_pull_output()),
+        usb_bus: st_bus,
     }
 }
