@@ -54,7 +54,7 @@ fn create_ptty() -> Result<(File, OwnedFd), io::Error> {
     let slave_name = ttyname(&slave)?;
     symlink(&slave_name, symlink_path)?;
     symlink(&slave_name, generic_path)?;
-    println!("Virtual COM Port (Slave) path: {:?}", slave_name);
+    println!("PTY path: {:?}", slave_name);
 
     let mut termios = tcgetattr(slave.as_fd())?;
 

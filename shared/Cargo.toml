@@ -6,8 +6,8 @@ edition = "2024"
 [features]
 default = []
 defmt = ["dep:defmt"]
-std-json = ["dep:serde", "dep:serde_json", "minicbor/alloc", "dep:nix",
-  "dep:gstreamer", "dep:gstreamer-webrtc" ]
+std-json = ["dep:serde", "dep:serde_json", "minicbor/alloc", "dep:nix" ]
+gstreamer = [ "dep:gstreamer", "dep:gstreamer-webrtc" ]
 
 [dependencies]
 minicbor = { version = "2.2", features = ["derive"] }
@@ -32,4 +32,4 @@ required-features = ["std-json"]
 [[bin]]
 name = "remote_adapter"
 path = "src/remote_adapter.rs"
-required-features = ["std-json"]
+required-features = [ "std-json","gstreamer" ]

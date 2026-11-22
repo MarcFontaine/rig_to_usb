@@ -42,6 +42,68 @@
     ]
   );
 
+  utils = pkgs.rustPlatform.buildRustPackage rec {
+    pname = "rig_to_usb_utils";
+    version = "0.0.0";
+    src = ./.;
+
+    cargoLock = {
+      lockFile = ./Cargo.lock;
+      outputHashes = {
+      };
+    };
+    cargoBuildFlags = [
+      "--bin" "stdin_to_cbor"
+      "--bin" "pty_bridge"
+      "--features" "std-json"
+      "--target" pkgs.stdenv.hostPlatform.config
+    ];
+    cargoTestFlags = [
+      "--bin" "stdin_to_cbor"
+      "--bin" "pty_bridge"
+      "--features" "std-json"
+      "--target" pkgs.stdenv.hostPlatform.config
+    ];
+    nativeBuildInputs = [ pkgs.pkg-config ];
+    buildInputs = [
+    ];
+  };
+
+  remoteAdapter = pkgs.rustPlatform.buildRustPackage rec {
+      pname = "rig_to_usb_remote";
+      version = "0.0.0";
+      src = ./.;
+
+      cargoLock = {
+        lockFile = ./Cargo.lock;
+        outputHashes = {
+        };
+      };
+      cargoBuildFlags = [
+        "--bin" "remote_adapter"
+        "--features" "std-json"
+        "--features" "gstreamer"
+        "--target" pkgs.stdenv.hostPlatform.config
+      ];
+      cargoTestFlags = [
+        "--bin" "remote_adapter"
+        "--features" "std-json"
+        "--features" "gstreamer"
+        "--target" pkgs.stdenv.hostPlatform.config
+      ];
+      nativeBuildInputs = [ pkgs.pkg-config ];
+      buildInputs = with pkgs; [
+        glib
+#        glibc.dev
+        gst_all_1.gstreamer.dev
+        gst_all_1.gst-plugins-base.dev
+        gst_all_1.gst-plugins-good.dev
+        gst_all_1.gst-plugins-bad.dev
+        gst_all_1.gst-plugins-ugly.dev
+        gst_webrtc.dev
+      ];
+  };
+
   in
     {
     inherit gst_webrtc;
@@ -100,29 +162,8 @@
         echo "Rust-Version: $(rustc --version)"
       '';
     };
-    packages.x86_64-linux.default = pkgs.rustPlatform.buildRustPackage rec {
-      pname = "rig_to_usb";
-      version = "0.0.0";
-      src = ./.;
-
-      cargoLock = {
-        lockFile = ./Cargo.lock;
-        outputHashes = {
-        };
-      };
-      cargoBuildFlags = [
-        "--bin" "stdin_to_cbor"
-        "--features" "std-json"
-        "--target" pkgs.stdenv.hostPlatform.config
-      ];
-      cargoTestFlags = [
-        "--bin" "stdin_to_cbor"
-        "--features" "std-json"
-        "--target" pkgs.stdenv.hostPlatform.config
-      ];
-      nativeBuildInputs = [ pkgs.pkg-config ];
-      buildInputs = [
-      ];
-    };
+    packages.x86_64-linux.default = utils;
+    packages.x86_64-linux.utils = utils;
+    packages.x86_64-linux.remoteAdapter = remoteAdapter;
   };
 }
