@@ -66,7 +66,7 @@ pub enum Cmd<'a> {
 }
 
 #[cfg(any(feature = "std-json", feature = "defmt"))]
-pub fn encode_test(cmd: Cmd) -> () {
+pub fn encode_test(cmd: Cmd) {
     let mut tx_buffer1 = [0u8; 64];
     let mut cursor1 = Cursor::new(&mut tx_buffer1[..]);
     match minicbor::encode(&cmd, &mut cursor1) {

@@ -14,13 +14,10 @@
       overlays = [ fenix.overlays.default ];
     };
     toolchain = with fenix.packages.${system}; combine [
-      complete.cargo
-      complete.rustc
-      complete.llvm-tools
+      complete.toolchain # contains rustc, cargo, clippy, rustfmt, rust-src, llvm-tools
       targets.thumbv7em-none-eabihf.latest.rust-std
       targets.thumbv7m-none-eabi.latest.rust-std
       targets.x86_64-unknown-linux-gnu.latest.rust-std
-      # targets.wasm32-unknown-unknown.latest.rust-std
       targets.wasm32v1-none.latest.rust-std
     ];
     gst_webrtc = (pkgs.gst_all_1.gst-plugins-rs
@@ -119,8 +116,7 @@
         cargo-bloat
         flip-link
         cargo-edit
-        rust-analyzer
-        rustfmt
+        fenix.packages.x86_64-linux.rust-analyzer
         dfu-util
         evcxr
         # wasm-bindgen-cli_0_2_126 # for std

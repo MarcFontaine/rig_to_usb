@@ -18,25 +18,25 @@ fn add_char(msg: &mut Buffer, discarded: &mut Buffer, l: &mut Line, chr: u8) -> 
         NoLF => {
             if chr == config::XK852_LF {
                 msg.enqueue(chr);
-                return Some(LFSeen);
+                Some(LFSeen)
             } else {
                 discarded.enqueue(chr);
-                return Some(NoLF);
+                Some(NoLF)
             }
         }
         LFSeen => match chr {
             config::XK852_LF => {
                 discarded.extend(msg.drain());
                 msg.enqueue(chr);
-                return Some(LFSeen);
+                Some(LFSeen)
             }
             config::XK852_CR => {
                 msg.enqueue(chr);
-                return None;
+                None
             }
             other => {
                 msg.enqueue(other);
-                return Some(LFSeen);
+                Some(LFSeen)
             }
         },
     }
@@ -66,7 +66,7 @@ pub fn init_line_state() -> LineState {
 
 pub fn update_xk852_line(b: &mut Board, ls: &mut LineState) {
     if let Scanning { l, prefix, msg } = ls {
-        while let Some(byte) = b.cat_rx.next() {
+        for byte in b.cat_rx.by_ref() {
             let chr = byte & 0x7F;
             defmt::info!("Byte received: {:a}", chr);
             let res = add_char(msg, prefix, l, chr);

@@ -9,7 +9,7 @@ use rig_to_usb_logic::cmd::Cmd::*;
 use rig_to_usb_logic::morse::LineState;
 
 pub fn decode_and_run(board: &mut Board, mut tasks: Tasks, packet: &[u8], clock: u64) -> Tasks {
-    let mut decoder = minicbor::Decoder::new(&packet);
+    let mut decoder = minicbor::Decoder::new(packet);
     if let Ok(cmd) = decoder.decode::<Cmd>() {
         defmt::info!("cbor decode message: {}", cmd);
         tasks = run_cmd(board, tasks, cmd, clock);

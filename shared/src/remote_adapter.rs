@@ -1,6 +1,5 @@
 use gstreamer as gst;
 use gstreamer::prelude::*;
-use gstreamer_webrtc;
 use std::env;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

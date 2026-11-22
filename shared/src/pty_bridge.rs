@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 
     /*
-    */
+     */
 }
 
 fn create_ptty() -> Result<(File, OwnedFd), io::Error> {

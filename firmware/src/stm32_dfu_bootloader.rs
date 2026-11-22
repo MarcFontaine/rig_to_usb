@@ -2,7 +2,6 @@ use core::sync::atomic::{AtomicU32, Ordering};
 #[unsafe(no_mangle)]
 #[used]
 #[unsafe(link_section = ".noinit.BOOTLOADER_TAG")]
-
 static BOOTLOADER_TAG: [AtomicU32; 2] = [AtomicU32::new(0), AtomicU32::new(0)];
 
 pub fn set_jump_to_bootloader_flag() {

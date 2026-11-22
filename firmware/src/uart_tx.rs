@@ -36,7 +36,7 @@ static TX_BUFFER_CELL: StaticCell<[u8; CAT_TX_BUFFER_LEN]> = StaticCell::new();
 
 pub fn init_tx(tx: serial::TxDma1) -> TxState {
     Ready {
-        tx: tx,
+        tx,
         buf: DynamicDmaBuffer {
             buf: TX_BUFFER_CELL.init([0; CAT_TX_BUFFER_LEN]),
             len: 0,
@@ -45,16 +45,12 @@ pub fn init_tx(tx: serial::TxDma1) -> TxState {
 }
 
 pub fn send_uart(mut tx_state: TxState, bytes: &[u8]) -> TxState {
-    if let Busy(ref tx) = tx_state {
-        if tx.is_done() {
-            if let Busy(tx) = tx_state {
-                let (buf, tx_new) = tx.wait();
-                tx_state = Ready {
-                    tx: tx_new,
-                    buf: buf,
-                };
-            }
-        }
+    if let Busy(ref tx) = tx_state
+        && tx.is_done()
+        && let Busy(tx) = tx_state
+    {
+        let (buf, tx_new) = tx.wait();
+        tx_state = Ready { tx: tx_new, buf };
     }
     match tx_state {
         Ready { tx, mut buf } => {

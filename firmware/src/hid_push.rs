@@ -39,7 +39,6 @@ pub fn hid_push<'a, B: UsbBus>(my_usb: &mut MyUsb<'a, B>, ls: &mut xk852line::Li
             Ok(_bytes_sent) => {
                 defmt::info!("Push hid: {:?}", packet);
                 *ls = xk852line::init_line_state();
-                return;
             }
             Err(UsbError::WouldBlock) => {
                 defmt::info!("WouldBlock");
