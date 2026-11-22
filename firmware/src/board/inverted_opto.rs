@@ -1,3 +1,8 @@
+// Hochschalten und On/Off sind hier invertiert.
+// 1 => Radio aus
+// 0 => Radio an
+// 1 = Rx
+// 0 => Tx
 use core::mem;
 use crate::hal::{*};
 

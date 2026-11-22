@@ -1,7 +1,7 @@
 #[cfg(feature = "stm32f103")]
-pub mod bremer;
+pub mod inverted_opto;
 
-pub use bremer::{Board};
+pub use inverted_opto::{Board};
 
 
 
