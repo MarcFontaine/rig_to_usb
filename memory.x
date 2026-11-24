@@ -7,9 +7,8 @@ MEMORY
 
 SECTIONS
 {
-  .my_pinned_tag (ORIGIN(RAM) + LENGTH(RAM) - 8) (NOLOAD) :
+  .my_pinned_tag ORIGIN(TAG_REGION) (NOLOAD) :
   {
-    *(.noinit.BOOTLOADER_TAG);
+    KEEP(*(.noinit.BOOTLOADER_TAG));
   } > TAG_REGION
 }
-INSERT AFTER .text;
