@@ -9,26 +9,54 @@ use std::io::{Read, Write};
 use std::os::fd::AsFd;
 use std::os::unix::fs::symlink;
 use std::os::unix::prelude::OwnedFd;
-use std::path::Path;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::thread;
+
+use clap::{ArgAction, Parser};
+use git_version::git_version;
 
 use rig_to_usb_logic::cmd::Cmd;
 use rig_to_usb_logic::hid_report::HIDReport;
 
 const HID_REPORT_SIZE: usize = 64;
 
+const VERSION: &str = git_version!(
+    prefix = concat!(env!("CARGO_PKG_VERSION"), " ("),
+    suffix = ")"
+);
+
+/// Create a pty from a rigToUSB HID device
+#[derive(Parser)]
+#[command(
+    name = env!("CARGO_BIN_NAME"),
+    version = VERSION,
+    about
+)]
+struct Args {
+    /// HID device path
+    #[arg(long, default_value = "/dev/hidraw_RigToUSB", value_parser = validate_hid_device)]
+    hid: PathBuf,
+    /// generic pty device path (symlink)
+    #[arg(long, default_value = "/tmp/xk852_serial")]
+    pty: PathBuf,
+    /// Debug-Level (-d, -dd, -ddd)
+    #[arg(short, long, action = ArgAction::Count)]
+    debug: u8,
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let (pty, mut _slave) = create_ptty()?;
+    let args = Args::parse();
+    let (pty, mut _slave) = create_ptty(args.pty)?;
     let pty_reader = Arc::new(pty);
     let pty_writer = pty_reader.clone();
 
-    let hid_file = open_hid_device()?;
+    let hid_file = open_hid_device(args.hid)?;
     let hid_reader = Arc::new(hid_file);
     let hid_writer = hid_reader.clone();
 
     let hid_to_pty_thread = thread::spawn(move || hid_to_pty(hid_reader, pty_writer));
-    let pty_to_hid_thread = thread::spawn(move || pty_to_hid(pty_reader, hid_writer));
+    let pty_to_hid_thread = thread::spawn(move || pty_to_hid(pty_reader, hid_writer, args.debug));
     hid_to_pty_thread.join().unwrap()?;
     pty_to_hid_thread.join().unwrap()?;
     Ok(())
@@ -37,17 +65,18 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
      */
 }
 
-fn create_ptty() -> Result<(File, OwnedFd), io::Error> {
-    let pid = std::process::id();
+fn create_ptty(generic_path: PathBuf) -> Result<(File, OwnedFd), io::Error> {
+    let symlink_path = PathBuf::from(format!(
+        "{}_{}",
+        generic_path.display(),
+        std::process::id()
+    ));
 
-    let symlink_path_str = format!("/tmp/xk852_serial_{}", pid);
-    let symlink_path = Path::new(&symlink_path_str);
-    let generic_path = Path::new("/tmp/xk852_serial");
-    if fs::symlink_metadata(symlink_path).is_ok() {
-        let _ = fs::remove_file(symlink_path);
+    if fs::symlink_metadata(&symlink_path).is_ok() {
+        let _ = fs::remove_file(&symlink_path);
     }
-    if fs::symlink_metadata(generic_path).is_ok() {
-        let _ = fs::remove_file(generic_path);
+    if fs::symlink_metadata(&generic_path).is_ok() {
+        let _ = fs::remove_file(&generic_path);
     }
 
     let OpenptyResult { master, slave } = openpty(None, None)?;
@@ -86,8 +115,7 @@ fn create_ptty() -> Result<(File, OwnedFd), io::Error> {
     Ok((master_file, slave))
 }
 
-fn open_hid_device() -> Result<File, io::Error> {
-    let hid_path = "/dev/hidraw_RigToUSB";
+fn open_hid_device(hid_path: PathBuf) -> Result<File, io::Error> {
     let hid_file = OpenOptions::new().read(true).write(true).open(hid_path)?;
     Ok(hid_file)
 }
@@ -123,69 +151,10 @@ fn hid_to_pty(
     Ok(())
 }
 
-/*
-    println!("[+] Bridge active. Bidirectional piping started...");
-
-    // Thread 1: Client -> PTY -> HID Device
-    let t1 = thread::spawn(move || {
-        let mut pty_in = pty_reader.as_ref();
-        let mut hid_out = hid_writer.as_ref();
-        let mut buf = [0u8; HID_REPORT_SIZE];
-
-        loop {
-            match pty_in.read(&mut buf) {
-                Ok(0) => continue, // Await new client connections
-                Ok(n) => {
-                    // Send exact byte length or zero-pad up to HID_REPORT_SIZE if required by firmware
-                    if let Err(e) = hid_out.write_all(&buf[..n]) {
-                        eprintln!("[Error] Writing to HID: {}", e);
-                        break;
-                    }
-                    let _ = hid_out.flush();
-                }
-                Err(e) => {
-                    eprintln!("[Error] Reading from PTY: {}", e);
-                    break;
-                }
-            }
-        }
-    });
-
-    // Thread 2: HID Device -> PTY -> Client
-    let t2 = thread::spawn(move || {
-        let mut hid_in = hid_reader.as_ref();
-        let mut pty_out = pty_writer.as_ref();
-        let mut buf = [0u8; HID_REPORT_SIZE];
-
-        loop {
-            match hid_in.read(&mut buf) {
-                Ok(0) => break, // HID Device disconnected physically
-                Ok(n) => {
-                    if let Err(e) = pty_out.write_all(&buf[..n]) {
-                        eprintln!("[Error] Writing to PTY client: {}", e);
-                        break;
-                    }
-                    let _ = pty_out.flush();
-                }
-                Err(e) => {
-                    eprintln!("[Error] Reading from HID: {}", e);
-                    break;
-                }
-            }
-        }
-    });
-
-    // Keep main thread alive
-    let _ = t1.join();
-    let _ = t2.join();
-
-    Ok(())
-}
-*/
-
 fn pty_to_hid(
     pty_reader: Arc<File>,
     hid_writer: Arc<File>,
+    debug_level: u8,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mut pty = pty_reader.as_ref();
     let mut hid = hid_writer.as_ref();
@@ -197,7 +166,9 @@ fn pty_to_hid(
                 break Ok(());
             }
             Ok(bytes_read) => {
-                println!("Received: {:?}", &buffer[..bytes_read]);
+                if debug_level > 0 {
+                    println!("Received: {:?}", &buffer[..bytes_read]);
+                }
                 let cmd = Cmd::SendCat {
                     bytes: &buffer[..bytes_read],
                 };
@@ -222,5 +193,32 @@ fn pty_to_hid(
                 }
             }
         }
+    }
+}
+
+fn validate_hid_device(s: &str) -> Result<PathBuf, String> {
+    let path = PathBuf::from(s);
+
+    if !path.exists() {
+        return Err(format!("'{}' : Device not found.", s));
+    }
+
+    OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(&path)
+        .map_err(|e| format!("'{} : Permissions denied : {}", s, e))?;
+
+    Ok(path)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn verify_cli() {
+        use clap::CommandFactory;
+        Args::command().debug_assert();
     }
 }
