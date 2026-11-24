@@ -39,6 +39,7 @@ jobs:
 
       - name: Build firmware .bin and .hex
         run: |
+          unset RUSTFLAGS
           cargo-objcopy -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi --profile release -- -O binary stm32f103.bin
           cargo-objcopy -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi --profile release -- -O ihex stm32f103.hex
 
