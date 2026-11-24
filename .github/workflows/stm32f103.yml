@@ -1,0 +1,47 @@
+name: STM32F103 Firmware Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain & Target
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: thumbv7m-none-eabi
+          components: llvm-tools, rustfmt, clippy
+
+      - name: Install cargo-binutils
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-binutils
+
+      - name: Check Formating
+        run: cargo fmt --check
+
+      - name: Run Clippy
+        run: cargo clippy -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi --profile release -- -D warnings
+
+      - name: Check Flash size
+        run: cargo size -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi --profile release
+
+      - name: Build firmware.bin
+        run: cargo-objcopy -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi --profile release -- -O binary firmware.bin
+
+      - name: Upload firmware.bin
+        uses: actions/upload-artifact@v4
+        with:
+          name: stm32f103-firmware
+          path: stm32f103.bin

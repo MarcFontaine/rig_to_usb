@@ -66,11 +66,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 
 fn create_ptty(generic_path: PathBuf) -> Result<(File, OwnedFd), io::Error> {
-    let symlink_path = PathBuf::from(format!(
-        "{}_{}",
-        generic_path.display(),
-        std::process::id()
-    ));
+    let symlink_path = PathBuf::from(format!("{}_{}", generic_path.display(), std::process::id()));
 
     if fs::symlink_metadata(&symlink_path).is_ok() {
         let _ = fs::remove_file(&symlink_path);
