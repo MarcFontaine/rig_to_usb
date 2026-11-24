@@ -6,8 +6,8 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  CARGO_TERM_COLOR: always
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -37,11 +37,20 @@ jobs:
       - name: Check Flash size
         run: cargo size -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi --profile release
 
-      - name: Build firmware.bin
+      - name: Build firmware
         run: cargo-objcopy -p rig_to_usb --bin hid_raw --features=stm32f103 --target=thumbv7m-none-eabi --profile release -- -O binary firmware.bin
 
-      - name: Upload firmware.bin
+      - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: stm32f103-firmware
           path: stm32f103.bin
+
+      - name: Publish Latest Firmware
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest Firmware Build
+          body: "Latest STM32F103 firmware (${{ github.sha }})."
+          files: stm32f103.bin
+          prerelease: true
