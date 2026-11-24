@@ -2,8 +2,9 @@
 resolver = "3"
 
 members = [
-    "firmware",
     "shared",
+    "firmware",
+    "cli",
     "browser"
 ]
 
